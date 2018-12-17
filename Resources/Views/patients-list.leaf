@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthBeam Admin Portal2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/styles.min.css">
+</head>
+
+<body style="background-color:#eef4f7;">
+    <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><a href="/home"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></a></div>
+    <div class="patientsBlock" style="/*top:40px;*/padding:50px 0;height:536px;background-color:#eef4f7;">
+        <form id="patients" class="patients">
+            <h2 class="text-center" style="margin-top:5px;font-weight:bold;font-size:28px;margin-bottom:36px;color:inherit;">Patients</h2>
+            
+            #if(patients.count == 0) {
+            <p class="description">No patients were recorded</p>
+            } else {
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:25%;text-align:center;">Name</th>
+                            <th style="width:25%;text-align:center;">Gender</th>
+                            <th style="width:25%;text-align:center;">Age</th>
+                            <th style="text-align:center;width:25%;">Premise Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        #for(patient in patients) {
+
+                        <tr>
+                            <td style="width:25%;text-align:center;"><a href="#">#(patient.fullName)</a></td>
+                            <td style="text-align:center;width:25%;">#(patient.gender)</td>
+                            <td style="text-align:center;width:25%;">#(patient.premiseLocation)</td>
+                            <td style="text-align:center;width:20%;">#(patient.premiseLocation)</td>
+                        </tr>
+                        <tr></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
