@@ -8,17 +8,40 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import Crypto
+
 
 class AlertServices {
     
     //MARK: - Client Services
     
-    class func createAlert(_ request: Request, patientTag: PatientTag) throws -> Future<PatientAlert> {
+    class func createAlert(_ request: Request, encodedValue: PatientAlert.Encoded) throws -> Future<PatientAlert> {
+        
+        let directory = DirectoryConfig.detect()
+        let configDir = "Resources"
+        
+        let publicKeyData = try Data(contentsOf: URL(fileURLWithPath: directory.workDir)
+            .appendingPathComponent(configDir, isDirectory: true)
+            .appendingPathComponent("publicKey.key", isDirectory: false))
+        
+        let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: directory.workDir)
+            .appendingPathComponent(configDir, isDirectory: true)
+            .appendingPathComponent("privateKey.key", isDirectory: false))
+        
+        let encryptedData = try RSA.encrypt("1&0", key: .public(pem: publicKeyData))
+        
+        let data = encodedValue.value.data(using: .utf8)
+        
+        let decryptedData = try RSA.decrypt(data!, key: .private(pem: privateKeyData))
+
+        
+        
+        
         _ = try request.requireAuthenticated(User.self)
         let notAssociatedTag = Abort(.notFound, reason: "No patient is associated with this tag")
         return PatientTag.query(on: request)
-            .filter(\PatientTag.minor, .equal, patientTag.minor)
-            .filter(\PatientTag.major, .equal, patientTag.major)
+//            .filter(\PatientTag.minor, .equal, patientTag.minor)
+//            .filter(\PatientTag.major, .equal, patientTag.major)
             .first()
             .unwrap(or: notAssociatedTag)
             .flatMap({ patientTag in

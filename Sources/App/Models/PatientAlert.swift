@@ -57,9 +57,8 @@ final class PatientAlert: Content {
     }
     
     
-    struct AlertWrapper: Content {
-        var creationDate: Date
-        var patient: Patient
+    struct Encoded: Content {
+        var value: String
     }
     
     var id: Int?
