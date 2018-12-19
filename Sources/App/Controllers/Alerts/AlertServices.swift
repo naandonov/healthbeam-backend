@@ -10,38 +10,39 @@ import Vapor
 import FluentSQLite
 import Crypto
 
-
 class AlertServices {
     
     //MARK: - Client Services
     
-    class func createAlert(_ request: Request, encodedValue: PatientAlert.Encoded) throws -> Future<PatientAlert> {
+    class func createAlert(_ request: Request, encoding: PatientAlert.Encoded) throws -> Future<PatientAlert> {
         
-        let directory = DirectoryConfig.detect()
-        let configDir = "Resources"
+        guard let encryptedData = Data.init(fromHexEncodedString: encoding.value) else {
+            throw Abort(.badRequest, reason:"Missing Ecnrypted Data")
+        }
         
-        let publicKeyData = try Data(contentsOf: URL(fileURLWithPath: directory.workDir)
-            .appendingPathComponent(configDir, isDirectory: true)
-            .appendingPathComponent("publicKey.key", isDirectory: false))
-        
-        let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: directory.workDir)
-            .appendingPathComponent(configDir, isDirectory: true)
-            .appendingPathComponent("privateKey.key", isDirectory: false))
-        
-        let encryptedData = try RSA.encrypt("1&0", key: .public(pem: publicKeyData))
-        
-        let data = encodedValue.value.data(using: .utf8)
-        
-        let decryptedData = try RSA.decrypt(data!, key: .private(pem: privateKeyData))
-
+        let privateKey = try FileManager.shared.privateKeyContent()
+        let decryptedData = try RSA.decrypt(encryptedData, padding: .pkcs1, key: .private(pem: privateKey))
         
         
         
-        _ = try request.requireAuthenticated(User.self)
+        guard let decryptedString = String(data: decryptedData, encoding: .utf8),
+            decryptedString.split(separator: "&").count == 3 else {
+                throw Abort(.badRequest, reason:"Invalid request")
+        }
+        
+        let decryptedValues = decryptedString.split(separator: "&")
+        let requestTimeInterval = TimeInterval(decryptedValues[0])!
+        let minor = Int(decryptedValues[1])!
+        let major = Int(decryptedValues[2])!
+        
+        if (Date().timeIntervalSince1970 - requestTimeInterval) > 10 {
+            throw Abort(.badRequest, reason:"Invalid request")
+        }
+        
         let notAssociatedTag = Abort(.notFound, reason: "No patient is associated with this tag")
         return PatientTag.query(on: request)
-//            .filter(\PatientTag.minor, .equal, patientTag.minor)
-//            .filter(\PatientTag.major, .equal, patientTag.major)
+            .filter(\PatientTag.minor, .equal, minor)
+            .filter(\PatientTag.major, .equal, major)
             .first()
             .unwrap(or: notAssociatedTag)
             .flatMap({ patientTag in
@@ -102,13 +103,19 @@ class AlertServices {
     }
     
     
-    class func getPendingAlerts(_ request: Request) throws -> Future<[Patient]> {
+    class func getPendingAlerts(_ request: Request) throws -> Future<[PatientAlert.Record]> {
         let user = try request.requireAuthenticated(User.self)
         return try user.patientSubscriptions
             .query(on: request)
             .join(\PatientAlert.patientId, to: \Patient.id)
+            .alsoDecode(PatientAlert.self)
             .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
             .all()
+            .map({ joinedTables in
+                try joinedTables.map {
+                    try PatientAlert.Record(patientAlert: $0.1, patient: $0.0)
+                }
+            })
     }
     
     class func getAlertRecords(_ request: Request) throws -> Future<[PatientAlert.Record]> {
@@ -121,11 +128,9 @@ class AlertServices {
             .alsoDecode(User.self)
             .all()
             .map({ joinedTables in
-                var records: [PatientAlert.Record] = []
-                for row in joinedTables {
-                    try records.append(PatientAlert.Record(patientAlert: row.0.0, patient: row.0.1, responder: row.1))
+                try joinedTables.map {
+                    try PatientAlert.Record(patientAlert: $0.0.0, patient: $0.0.1, responder: $0.1)
                 }
-                return records
             })
     }
     
@@ -136,8 +141,8 @@ class AlertServices {
             .flatMap { records in
                 let context = ["records": records]
                 return try request.view().render("alert-records", context)
-            }
+        }
     }
-
+    
     
 }

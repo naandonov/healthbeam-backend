@@ -27,6 +27,23 @@ class PatientServices {
             }).transform(to: .ok)
     }
     
+    class func searchPatients(_ request: Request) throws -> Future<[Patient.Public]> {
+        _ = try request.requireAuthenticated(User.self)
+        guard let searchQuery = request.query[String.self, at: "search"] else {
+            throw Abort(.badRequest, reason: "Missing search query")
+        }
+        
+        return Patient.query(on: request)
+//            .filter(custom: SQLiteExpression)
+//            .filter(custom: SQLiteExpression)
+            .filter(\Patient.fullName, .like, searchQuery)
+            .all()
+            .map { patients in
+                try patients.map { try $0.mapToPublic()
+                }
+        }
+    }
+    
     //MARK: - Web Services
     
     class func renderPatientsList(_ request: Request) throws -> Future<View> {

@@ -41,7 +41,7 @@ final class PatientAlert: Content {
         var responder: User.ExternalPublic?
         
         
-        init(patientAlert: PatientAlert, patient: Patient, responder: User?) throws {
+        init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil) throws {
             self.id = try patientAlert.requireID()
             self.creationDate = patientAlert.creationDate.extendedDateString()
             if let respondDate = patientAlert.respondDate {

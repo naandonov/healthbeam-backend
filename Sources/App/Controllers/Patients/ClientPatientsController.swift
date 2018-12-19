@@ -15,5 +15,6 @@ class ClientPatientsController: RouteCollection {
         let patientsRouter = router.grouped("patients").authorizedRouter()
         ServiceUtilities.generateOperations(router: patientsRouter, for: Patient.self, requireAuthorization: true, operationsSelector: .create, .get, .getAll, .update)
         patientsRouter.delete(Patient.parameter, use: PatientServices.deletePatient)
+        patientsRouter.get(use: PatientServices.searchPatients)
     }
 }
