@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 
 final class User: Content {
@@ -87,5 +87,7 @@ extension User: PasswordAuthenticatable {
 extension User: SessionAuthenticatable {}
 
 extension User: Parameter {}
-extension User: SQLiteModel {}
+extension User: PostgreSQLModel {
+    static var entity :String = "user"
+}
 extension User: Migration {}

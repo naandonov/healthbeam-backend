@@ -1,4 +1,4 @@
-import FluentSQLite
+import FluentPostgreSQL
 import Vapor
 import Leaf
 import Authentication
@@ -8,7 +8,7 @@ import Authentication
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
-    try services.register(FluentSQLiteProvider())
+    try services.register(FluentPostgreSQLProvider())
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
 
@@ -22,26 +22,30 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     middlewares.use(SessionsMiddleware.self)
-    services.register(middlewares)
 
-    // Configure a SQLite database
-    let sqlite = try SQLiteDatabase(storage: .file(path: "healthbeam.sqlite"))
+    // Configure a PostgreSQL database
+    let postgresqlConfig = PostgreSQLDatabaseConfig(
+        hostname: "localhost",
+        username: "nikolay.andonov",
+        database: "healthbeam",
+        password: nil
+    )
+    let postgresqlDatabase = PostgreSQLDatabase(config: postgresqlConfig)
     
-    /// Register the configured SQLite database to the database config.
     var databases = DatabasesConfig()
-    databases.add(database: sqlite, as: .sqlite)
+    databases.add(database: postgresqlDatabase, as: .psql)
     services.register(databases)
 
 
     /// Configure migrations
     var migrations = MigrationConfig()
-    migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: Patient.self, database: .sqlite)
-    migrations.add(model: HealthRecord.self, database: .sqlite)
-    migrations.add(model: TokenRecord.self, database: .sqlite)
-    migrations.add(model: UserPatient.self, database: .sqlite)
-    migrations.add(model: PatientTag.self, database: .sqlite)
-    migrations.add(model: PatientAlert.self, database: .sqlite)
+    migrations.add(model: User.self, database: .psql)
+    migrations.add(model: Patient.self, database: .psql)
+    migrations.add(model: HealthRecord.self, database: .psql)
+    migrations.add(model: TokenRecord.self, database: .psql)
+    migrations.add(model: UserPatient.self, database: .psql)
+    migrations.add(model: PatientTag.self, database: .psql)
+    migrations.add(model: PatientAlert.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

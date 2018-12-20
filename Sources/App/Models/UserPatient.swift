@@ -7,10 +7,10 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 
-final class UserPatient: SQLitePivot, ModifiablePivot {
+final class UserPatient: PostgreSQLPivot, ModifiablePivot {
     
     typealias Left = User
     typealias Right = Patient
@@ -29,3 +29,6 @@ final class UserPatient: SQLitePivot, ModifiablePivot {
 }
 
 extension UserPatient: Migration {}
+extension UserPatient: PostgreSQLModel {
+    static var entity :String = "user_patient"
+}

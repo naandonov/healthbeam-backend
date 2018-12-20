@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 final class HealthRecord: Content {
     
@@ -49,13 +49,15 @@ final class HealthRecord: Content {
 }
 
 extension HealthRecord: Migration {
-    public static func prepare(on connection: SQLiteConnection) -> Future<Void> {
-        return Database.create(self, on: connection) { builder in
-            try addProperties(to: builder)
-            builder.reference(from: \.patientId, to: \Patient.id)
-        }
-    }
+//    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+//        return Database.create(self, on: connection) { builder in
+//            try addProperties(to: builder)
+//            builder.reference(from: \.patientId, to: \Patient.id)
+//        }
+//    }
 }
 
 extension HealthRecord: Parameter {}
-extension HealthRecord: SQLiteModel {}
+extension HealthRecord: PostgreSQLModel {
+    static var entity :String = "health_record"
+}
