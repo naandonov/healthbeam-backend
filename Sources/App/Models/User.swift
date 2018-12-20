@@ -87,7 +87,5 @@ extension User: PasswordAuthenticatable {
 extension User: SessionAuthenticatable {}
 
 extension User: Parameter {}
-extension User: PostgreSQLModel {
-    static var entity :String = "user"
-}
+extension User: PostgreSQLModel {}
 extension User: Migration {}

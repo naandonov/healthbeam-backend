@@ -87,7 +87,5 @@ extension PatientAlert: Migration {
 }
 
 extension PatientAlert: Parameter {}
-extension PatientAlert: PostgreSQLModel {
-    static var entity :String = "patient_alert"
-}
+extension PatientAlert: PostgreSQLModel {}
 

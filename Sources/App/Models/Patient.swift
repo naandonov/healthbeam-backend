@@ -71,9 +71,7 @@ extension Patient {
 }
 
 extension Patient: Parameter {}
-extension Patient: PostgreSQLModel {
-    static var entity :String = "patient"
-}
+extension Patient: PostgreSQLModel {}
 
 extension Patient: Migration {
 //    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {

@@ -41,7 +41,5 @@ final class AuthenticationRecord: Content {
 }
 
 extension AuthenticationRecord: Parameter {}
-extension AuthenticationRecord: PostgreSQLModel {
-    static var entity :String = "authentication_record"
-}
+extension AuthenticationRecord: PostgreSQLModel {}
 extension AuthenticationRecord: Migration {}

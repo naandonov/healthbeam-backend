@@ -29,6 +29,4 @@ final class UserPatient: PostgreSQLPivot, ModifiablePivot {
 }
 
 extension UserPatient: Migration {}
-extension UserPatient: PostgreSQLModel {
-    static var entity :String = "user_patient"
-}
+extension UserPatient: PostgreSQLModel {}
