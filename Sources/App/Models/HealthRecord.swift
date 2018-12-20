@@ -58,6 +58,4 @@ extension HealthRecord: Migration {
 }
 
 extension HealthRecord: Parameter {}
-extension HealthRecord: PostgreSQLModel {
-    static var entity :String = "health_record"
-}
+extension HealthRecord: PostgreSQLModel {}

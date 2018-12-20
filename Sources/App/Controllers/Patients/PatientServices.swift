@@ -33,22 +33,17 @@ class PatientServices {
             throw Abort(.badRequest, reason: "Missing search query")
         }
         
-        return request.withPooledConnection(to: .psql) { conn in
-            return conn.raw("SELECT * FROM patients")
-                .all(decoding: Patient.self)
-            }.map { patients in
-                return try patients.map { try $0.mapToPublic()}
+        if searchQuery.count < 4 {
+            return Future.map(on: request) { return [] }
         }
         
-//        return Patient.query(on: request)
-////            .filter(custom: SQLiteExpression)
-////            .filter(custom: SQLiteExpression)
-//            .filter(\Patient.fullName, .like, searchQuery)
-//            .all()
-//            .map { patients in
-//                try patients.map { try $0.mapToPublic()
-//                }
-//        }
+        return request.withNewConnection(to: .psql) { connection in
+            return connection
+                .raw("SELECT * FROM \"Patient\" WHERE LOWER(\"fullName\") LIKE LOWER('%\(searchQuery)%')")
+                .all(decoding: Patient.self)
+            } .map { patients in
+                return try patients.map { try $0.mapToPublic() }
+        }
     }
     
     //MARK: - Web Services

@@ -48,6 +48,4 @@ extension TokenRecord: Migration {
 //        }
 //    }
 }
-extension TokenRecord: PostgreSQLModel {
-    static var entity :String = "token_record"
-}
+extension TokenRecord: PostgreSQLModel {}

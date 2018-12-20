@@ -49,7 +49,5 @@ extension PatientTag: Migration {
 }
 
 extension PatientTag: Parameter {}
-extension PatientTag: PostgreSQLModel {
-    static var entity :String = "patient_tag"
-}
+extension PatientTag: PostgreSQLModel {}
 
