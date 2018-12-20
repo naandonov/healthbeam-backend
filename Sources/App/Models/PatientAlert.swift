@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 enum AlertStatus: String {
     case pending = "pending"
@@ -77,15 +77,17 @@ final class PatientAlert: Content {
 }
 
 extension PatientAlert: Migration {
-    public static func prepare(on connection: SQLiteConnection) -> Future<Void> {
-        return Database.create(self, on: connection) { builder in
-            try addProperties(to: builder)
-            builder.reference(from: \.patientId, to: \Patient.id)
-            builder.reference(from: \.responderId, to: \User.id)
-        }
-    }
+//    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+//        return Database.create(self, on: connection) { builder in
+//            try addProperties(to: builder)
+//            builder.reference(from: \.patientId, to: \Patient.id)
+//            builder.reference(from: \.responderId, to: \User.id)
+//        }
+//    }
 }
 
 extension PatientAlert: Parameter {}
-extension PatientAlert: SQLiteModel {}
+extension PatientAlert: PostgreSQLModel {
+    static var entity :String = "patient_alert"
+}
 

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import FluentSQLite
+import FluentPostgreSQL
 import Authentication
 
 final class TokenRecord: Content {
@@ -41,11 +41,13 @@ extension TokenRecord: Authentication.Token {
 }
 
 extension TokenRecord: Migration {
-    public static func prepare(on connection: SQLiteConnection) -> Future<Void> {
-        return Database.create(self, on: connection) { builder in
-            try addProperties(to: builder)
-            builder.reference(from: \.userId, to: \User.id)
-        }
-    }
+//    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+//        return Database.create(self, on: connection) { builder in
+//            try addProperties(to: builder)
+//            builder.reference(from: \.userId, to: \User.id)
+//        }
+//    }
 }
-extension TokenRecord: SQLiteModel {}
+extension TokenRecord: PostgreSQLModel {
+    static var entity :String = "token_record"
+}

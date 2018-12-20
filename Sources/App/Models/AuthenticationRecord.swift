@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 final class AuthenticationRecord: Content {
     
@@ -41,5 +41,7 @@ final class AuthenticationRecord: Content {
 }
 
 extension AuthenticationRecord: Parameter {}
-extension AuthenticationRecord: SQLiteModel {}
+extension AuthenticationRecord: PostgreSQLModel {
+    static var entity :String = "authentication_record"
+}
 extension AuthenticationRecord: Migration {}

@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 class PatientServices {
     
@@ -33,15 +33,22 @@ class PatientServices {
             throw Abort(.badRequest, reason: "Missing search query")
         }
         
-        return Patient.query(on: request)
-//            .filter(custom: SQLiteExpression)
-//            .filter(custom: SQLiteExpression)
-            .filter(\Patient.fullName, .like, searchQuery)
-            .all()
-            .map { patients in
-                try patients.map { try $0.mapToPublic()
-                }
+        return request.withPooledConnection(to: .psql) { conn in
+            return conn.raw("SELECT * FROM patients")
+                .all(decoding: Patient.self)
+            }.map { patients in
+                return try patients.map { try $0.mapToPublic()}
         }
+        
+//        return Patient.query(on: request)
+////            .filter(custom: SQLiteExpression)
+////            .filter(custom: SQLiteExpression)
+//            .filter(\Patient.fullName, .like, searchQuery)
+//            .all()
+//            .map { patients in
+//                try patients.map { try $0.mapToPublic()
+//                }
+//        }
     }
     
     //MARK: - Web Services

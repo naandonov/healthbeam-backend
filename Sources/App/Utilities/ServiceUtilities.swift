@@ -7,9 +7,9 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
-typealias CRUDModelProvider = Content & Parameter & SQLiteModel
+typealias CRUDModelProvider = Content & Parameter & PostgreSQLModel
 
 enum CRUDOperationSelector {
     case create
