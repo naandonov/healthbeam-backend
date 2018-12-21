@@ -10,22 +10,33 @@ import Vapor
 import FluentPostgreSQL
 
 class HealthRecordServices {
-
-    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Request) throws -> Future<HealthRecord> {
-        _ = try request.requireAuthenticated(User.self)
+    
+    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Request) throws -> Future<HealthRecord.Public> {
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
-            try recordRequest
-                .model(with: patient.requireID())
-                .save(on: request)
+            let record = try recordRequest.model(with: patient.requireID())
+            try record.userId = user.requireID()
+            return record.save(on: request).map{ _ in
+                try record.mapToPublic(creator: user)
+            }
         }
     }
     
-    class func getHealthRecords(request: Request) throws -> Future<[HealthRecord]> {
+    class func getHealthRecords(request: Request) throws -> Future<[HealthRecord.Public]> {
         _ = try request.requireAuthenticated(User.self)
+        //TODO: Currently if the user get deleted the health record won't be fetched
         return try request.parameters.next(Patient.self).flatMap { patient in
             try patient.healthRecords
                 .query(on: request)
+                .join(\User.id, to: \HealthRecord.userId)
+                .alsoDecode(User.self)
                 .all()
+                .map({ joinedTable in
+                    return try joinedTable.map {
+                        let record = $0.0
+                        return try record.mapToPublic(creator: $0.1)
+                    }
+                })
         }
     }
     

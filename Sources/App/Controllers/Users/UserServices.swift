@@ -65,6 +65,21 @@ class UserServices {
         return try user.patientSubscriptions.query(on: request).all()
     }
     
+    class func saveDeviceToken(_ request: Request) throws -> Future<HTTPStatus> {
+        let user = try request.requireAuthenticated(User.self)
+        return try request.content.decode(Device.Request.self).flatMap{ deviceRequest in
+            return try user.userDevice.query(on: request)
+                .first()
+                .flatMap { device in
+                    if let device = device {
+                        device.deviceToken = deviceRequest.deviceToken
+                        return device.update(on: request).transform(to: .ok)
+                    }
+                    return deviceRequest.model().save(on: request).transform(to: .ok)
+            }
+        }
+    }
+    
     //MARK: - Web Services
     
     

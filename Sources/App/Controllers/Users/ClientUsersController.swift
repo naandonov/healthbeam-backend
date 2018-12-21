@@ -17,5 +17,7 @@ class ClientUsersController: RouteCollection {
         userRouter.post("subscribe", use: UserServices.subscribeToPatient)
         userRouter.post("unsubscribe", use: UserServices.unsubscribeToPatient)
         userRouter.get("subscriptions", use: UserServices.getPatientSubscriptions)
+        userRouter.post("deviceToken", use: UserServices.saveDeviceToken)
+
     }
 }
