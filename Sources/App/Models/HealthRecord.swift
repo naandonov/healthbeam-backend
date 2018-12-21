@@ -29,6 +29,16 @@ final class HealthRecord: Content {
         }
     }
     
+    struct Public: Content {
+        var id: Int?
+        
+        var diagnosis: String
+        var treatment: String
+        var prescription: String
+        var createdDate: Date
+        var creator: User.ExternalPublic?
+    }
+    
     var id: Int?
     
     var diagnosis: String
@@ -36,6 +46,7 @@ final class HealthRecord: Content {
     var prescription: String
     var createdDate: Date
     var patientId: Patient.ID
+    var userId: User.ID?
     
     init(id: Int? = nil, diagnosis: String, treatment: String, prescription: String, createdDate: Date, patientId: Patient.ID) {
         self.id = id
@@ -46,6 +57,21 @@ final class HealthRecord: Content {
         self.patientId = patientId
     }
     
+    func mapToPublic(creator: User? = nil) throws -> HealthRecord.Public {
+        return try HealthRecord.Public(id: requireID(),
+                                       diagnosis: diagnosis,
+                                       treatment: treatment,
+                                       prescription: prescription,
+                                       createdDate: createdDate,
+                                       creator: creator?.mapToExternalPublic())
+    }
+    
+}
+
+extension HealthRecord {
+    var creator: Parent<HealthRecord, User>? {
+        return parent(\.userId)
+    }
 }
 
 extension HealthRecord: Migration {

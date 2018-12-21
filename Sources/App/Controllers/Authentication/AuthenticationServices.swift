@@ -40,10 +40,7 @@ class AuthenticationServices {
                     }
                     let hasher = try request.make(BCryptDigest.self)
                     if try hasher.verify(userLogin.password, created: existingUser.password) {
-                        return try TokenRecord
-                            .query(on: request)
-                            .filter(\TokenRecord.userId, .equal, existingUser.requireID())
-                            .delete()
+                        return try logoutHelper(request, user: existingUser)
                             .flatMap { _ in
                                 let tokenString = try URandom().generateData(count: 32).base64EncodedString()
                                 let token = try TokenRecord(token: tokenString, userId: existingUser.requireID())
@@ -58,11 +55,19 @@ class AuthenticationServices {
     
     class func logout(_ request: Request) throws -> Future<HTTPResponse> {
         let user = try request.requireAuthenticated(User.self)
+        return try logoutHelper(request, user: user)
+    }
+    
+    private class func logoutHelper(_ request: Request, user: User) throws -> Future<HTTPResponse> {
         return try TokenRecord
             .query(on: request)
             .filter(\TokenRecord.userId, .equal, user.requireID())
             .delete()
-            .transform(to: HTTPResponse(status: .ok))
+            .flatMap{ _ in
+                try user.userDevice.query(on: request)
+                    .delete()
+                    .transform(to: HTTPResponse(status: .ok))
+        }
     }
     
     

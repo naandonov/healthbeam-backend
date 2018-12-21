@@ -46,6 +46,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: UserPatient.self, database: .psql)
     migrations.add(model: PatientTag.self, database: .psql)
     migrations.add(model: PatientAlert.self, database: .psql)
+    migrations.add(model: Device.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

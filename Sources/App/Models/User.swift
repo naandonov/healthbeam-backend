@@ -70,6 +70,10 @@ extension User {
     var patientSubscriptions: Siblings<User, Patient, UserPatient> {
         return siblings()
     }
+    
+    var userDevice: Children<User, Device> {
+        return children(\.userId)
+    }
 }
 
 extension User: TokenAuthenticatable {
