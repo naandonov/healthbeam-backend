@@ -32,16 +32,15 @@ class PatientServices {
         guard let searchQuery = request.query[String.self, at: "search"] else {
             throw Abort(.badRequest, reason: "Missing search query")
         }
-        if searchQuery.count < 4 {
-            return Future.map(on: request) { return [] }
-        }
         
-        return request.withNewConnection(to: .sqlite) { connection in
-            return connection
-                .raw("SELECT * FROM Patient WHERE fullName LIKE '%\(searchQuery)%'")
-                .all(decoding: Patient.self)
-        } .map { patients in
-            return try patients.map { try $0.mapToPublic() }
+        return Patient.query(on: request)
+//            .filter(custom: SQLiteExpression)
+//            .filter(custom: SQLiteExpression)
+            .filter(\Patient.fullName, .like, searchQuery)
+            .all()
+            .map { patients in
+                try patients.map { try $0.mapToPublic()
+                }
         }
     }
     
