@@ -45,7 +45,8 @@ class PatientTagServices {
     }
     
     class func unassignPatientTag(for patient: Patient, on request: Request) throws -> Future<HTTPStatus> {
-        let notFound = Abort(.badRequest, reason: "The Specified Patient doesn't have an associated Tag")
+        let notFound = Abort(.notFound, reason: "The Specified Patient doesn't have an associated Tag")
+        
         return try patient.patientTag.query(on: request).first()
             .unwrap(or: notFound)
             .delete(on: request)

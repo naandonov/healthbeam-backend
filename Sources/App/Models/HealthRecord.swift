@@ -17,6 +17,7 @@ final class HealthRecord: Content {
         var diagnosis: String
         var treatment: String
         var prescription: String
+        var notes: String?
         var createdDate: Date
         
         func model(with patientId: Patient.ID) -> HealthRecord {
@@ -24,6 +25,7 @@ final class HealthRecord: Content {
                                 diagnosis: diagnosis,
                                 treatment: treatment,
                                 prescription: prescription,
+                                notes: notes,
                                 createdDate: createdDate,
                                 patientId: patientId)
         }
@@ -35,6 +37,7 @@ final class HealthRecord: Content {
         var diagnosis: String
         var treatment: String
         var prescription: String
+        var notes: String?
         var createdDate: Date
         var creator: User.ExternalPublic?
     }
@@ -44,15 +47,17 @@ final class HealthRecord: Content {
     var diagnosis: String
     var treatment: String
     var prescription: String
+    var notes: String?
     var createdDate: Date
     var patientId: Patient.ID
     var userId: User.ID?
     
-    init(id: Int? = nil, diagnosis: String, treatment: String, prescription: String, createdDate: Date, patientId: Patient.ID) {
+    init(id: Int? = nil, diagnosis: String, treatment: String, prescription: String, notes: String? = nil, createdDate: Date, patientId: Patient.ID) {
         self.id = id
         self.diagnosis = diagnosis
         self.treatment = treatment
         self.prescription = prescription
+        self.notes = notes
         self.createdDate = createdDate
         self.patientId = patientId
     }
@@ -62,6 +67,7 @@ final class HealthRecord: Content {
                                        diagnosis: diagnosis,
                                        treatment: treatment,
                                        prescription: prescription,
+                                       notes: notes,
                                        createdDate: createdDate,
                                        creator: creator?.mapToExternalPublic())
     }

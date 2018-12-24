@@ -16,7 +16,7 @@ final class Patient: Content {
     }
     
     struct Public: Content {
-        var id: Int
+        var id: Int?
         var fullName: String
         var gender: String
         var personalIdentification: String
@@ -26,6 +26,17 @@ final class Patient: Content {
         var premiseLocation: String
         var patientTag: PatientTag.Public?
         var healthRecords: [HealthRecord]?
+        
+        func privateModel() -> Patient {
+            return Patient(id: id,
+                           fullName: fullName,
+                           gender: gender,
+                           personalIdentification: personalIdentification,
+                           birthDate: birthDate,
+                           bloodType: bloodType,
+                           alergies: alergies,
+                           premiseLocation: premiseLocation)
+        }
     }
     
     var id: Int?
@@ -41,7 +52,8 @@ final class Patient: Content {
     var patientTagId: PatientTag.ID?
     
     
-    init(fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String) {
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String) {
+        
         self.fullName = fullName
         self.gender = gender
         self.personalIdentification = personalIdentification
@@ -50,9 +62,22 @@ final class Patient: Content {
         self.alergies = alergies
         self.premiseLocation = premiseLocation
     }
+}
+
+extension Patient: PublicMapper {
+    typealias PublicElement = Patient.Public
     
     func mapToPublic() throws -> Patient.Public {
-        return try Patient.Public(id: requireID(), fullName: fullName, gender: gender, personalIdentification: personalIdentification, birthDate: birthDate, bloodType: bloodType, alergies: alergies, premiseLocation: premiseLocation, patientTag: nil, healthRecords: nil)
+        return try Patient.Public(id: requireID(),
+                                  fullName: fullName,
+                                  gender: gender,
+                                  personalIdentification: personalIdentification,
+                                  birthDate: birthDate,
+                                  bloodType: bloodType,
+                                  alergies: alergies,
+                                  premiseLocation: premiseLocation,
+                                  patientTag: nil,
+                                  healthRecords: nil)
     }
 }
 
