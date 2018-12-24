@@ -91,7 +91,7 @@ class ServiceUtilities {
         }
     }
     
-    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, queryConfigurations: [BatchQueryConfiguration] = [], elementsInPage: Int = 1) where T: PublicMapper {
+    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, queryConfigurations: [BatchQueryConfiguration] = [], elementsInPage: Int = 20) where T: PublicMapper {
         router.get() { request -> Future<BatchWrapper<T.PublicElement>> in
             _ = try request.requireAuthenticated(User.self)
             
