@@ -25,10 +25,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     // Configure a PostgreSQL database
     let postgresqlConfig = PostgreSQLDatabaseConfig(
-        hostname: "localhost",
-        username: "nikolay.andonov",
-        database: "healthbeam",
-        password: nil
+        serverAddress: PostgreSQLConnection.ServerAddress.tcp(hostname: "baasu.db.elephantsql.com", port: 5432),
+        username: "vdwegziv",
+        database: "vdwegziv",
+        password: "WSDEkQDZdenEafNbJGoyCc80N02Jq391"
     )
     let postgresqlDatabase = PostgreSQLDatabase(config: postgresqlConfig)
     
