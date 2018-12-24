@@ -75,7 +75,9 @@ class UserServices {
                         device.deviceToken = deviceRequest.deviceToken
                         return device.update(on: request).transform(to: .ok)
                     }
-                    return deviceRequest.model().save(on: request).transform(to: .ok)
+                    let model = deviceRequest.model()
+                    try model.userId = user.requireID()
+                    return model.save(on: request).transform(to: .ok)
             }
         }
     }
