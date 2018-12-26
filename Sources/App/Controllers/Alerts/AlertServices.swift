@@ -14,31 +14,29 @@ class AlertServices {
     
     //MARK: - Client Services
     
-    class func createAlert(_ request: Request, encoding: PatientAlert.Encoded) throws -> Future<PatientAlert> {
+    class func createAlert(_ request: Request, encoding: PatientAlert.Encoded) throws -> Future<HTTPStatus> {
         
         guard let encryptedData = Data.init(fromHexEncodedString: encoding.value) else {
             throw Abort(.badRequest, reason:"Missing Ecnrypted Data")
         }
-        
+
         let privateKey = try FileManager.shared.privateKeyContent()
         let decryptedData = try RSA.decrypt(encryptedData, padding: .pkcs1, key: .private(pem: privateKey))
-        
-        
-        
+
         guard let decryptedString = String(data: decryptedData, encoding: .utf8),
             decryptedString.split(separator: "&").count == 3 else {
                 throw Abort(.badRequest, reason:"Invalid request")
         }
-        
+
         let decryptedValues = decryptedString.split(separator: "&")
         let requestTimeInterval = TimeInterval(decryptedValues[0])!
         let minor = Int(decryptedValues[1])!
         let major = Int(decryptedValues[2])!
-        
+
         if (Date().timeIntervalSince1970 - requestTimeInterval) > 10 {
             throw Abort(.badRequest, reason:"Invalid request")
         }
-        
+
         let notAssociatedTag = Abort(.notFound, reason: "No patient is associated with this tag")
         return PatientTag.query(on: request)
             .filter(\PatientTag.minor, .equal, minor)
@@ -49,28 +47,52 @@ class AlertServices {
                 guard let patient = patientTag.patient else {
                     throw notAssociatedTag
                 }
-                
-                
-                return patient.query(on: request).first().unwrap(or: notAssociatedTag).flatMap({ patient in
-                    
+
+                return patient
+                    .query(on: request)
+                    .first()
+                    .unwrap(or: notAssociatedTag)
+                    .flatMap({ patient in
+
                     return try PatientAlert.query(on: request)
                         .filter(\.status == AlertStatus.pending.rawValue)
                         .filter(\.patientId == patient.requireID())
                         .first().flatMap({ alert in
-                            
+
                             if let _ = alert {
                                 throw Abort(.notFound, reason: "There is an existing pending alert for the specified patient.")
                             }
-                            
+
                             let newAlert = PatientAlert(creationDate: Date(), alertStatus: .pending)
                             try newAlert.patientId = patient.requireID()
                             
-                            //                    TODO: Dispatch Push Notificaitons
-                            //                    patient.observers.query(on: request).all().flatMap({ observers in
-                            //
-                            //                    })
+                            let patientObservers = try patient
+                                .observers
+                                .query(on: request)
+                                .all()
                             
-                            return newAlert.save(on: request)
+                            return newAlert
+                                .save(on: request)
+                                .and(patientObservers)
+                                .flatMap({ (_, observers) -> Future<Void> in
+
+                                    var chainedResponse: [Future<Void>] = []
+                                    for user in observers {
+                                        let userNotificationDispatch = try user
+                                                .userDevice
+                                                .query(on: request)
+                                                .first()
+                                                .flatMap{ device -> Future<Void> in
+                                                    if let device = device {
+                                                        let payload = APNSPayload.init(title: "Patient Alert", body: "\(patient.fullName) needs immediate assistance")
+                                                        return try ServiceUtilities.pushToDeviceToken(device.deviceToken, payload, request).transform(to: ())
+                                                    }
+                                                    return Future.map(on: request) { }
+                                                }
+                                        chainedResponse.append(userNotificationDispatch)
+                                    }
+                                    return Future<Void>.andAll(chainedResponse, eventLoop: patientObservers.eventLoop)
+                                }).transform(to: HTTPStatus.ok)
                         })
                 })
             })

@@ -156,4 +156,34 @@ class ServiceUtilities {
             }
         }
     }
+    
+    class func pushToDeviceToken(_ token: String, _ payload: APNSPayload, _ req: Request) throws -> Future<HTTPStatus> {
+        
+        let shell = try req.make(Shell.self)
+        
+        let certURL = FileManager.shared.pushCertificateURL()
+        let apnsURL: String
+        if Environment.IS_PRODUCTION_ENVIRONMENT {
+            apnsURL = "https://api.push.apple.com/3/device/"
+        }
+        else {
+            apnsURL =  "https://api.development.push.apple.com/3/device/"
+        }
+        let password = Environment.PUSH_CERTIFICATE_PWD
+        let bundleId = Environment.BUNDLE_IDENTIFIER
+        
+        let content = APNSPayloadContent(payload: payload)
+        let data = try JSONEncoder().encode(content)
+        guard let jsonString = String(data: data, encoding: .utf8) else {
+            throw Abort(.custom(code: 512, reasonPhrase: "Invalid APNS payload"))
+        }
+        
+        let arguments = ["-d", jsonString, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2-prior-knowledge", "--cert", "\(certURL.relativePath):\(password)", apnsURL + token]
+        
+        return try shell.execute(commandName: "curl", arguments: arguments).map(to: HTTPStatus.self) { data in
+            print(data)
+            return .ok
+        }
+        
+    }
 }

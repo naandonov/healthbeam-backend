@@ -25,11 +25,18 @@ class PatientTagServices {
                         return existingPatientTag.update(on: request)
                     }
                     else {
-                        patientTag.patientId = patient.id
-                        return patientTag.save(on: request).flatMap({ _ in
-                            patient.patientTagId = patientTag.id
-                            return patient.update(on: request).map({ _ -> PatientTag in
-                                patientTag
+                        return try patient.patientTag.query(on: request).first().flatMap({ tag -> Future<PatientTag> in
+                            if let unwrappedTag = tag {
+                                unwrappedTag.minor = patientTag.minor
+                                unwrappedTag.major = patientTag.major
+                                return unwrappedTag.update(on: request)
+                            }
+                            patientTag.patientId = patient.id
+                            return patientTag.save(on: request).flatMap({ _ in
+                                patient.patientTagId = patientTag.id
+                                return patient.update(on: request).map({ _ -> PatientTag in
+                                    patientTag
+                                })
                             })
                         })
                     }

@@ -27,4 +27,13 @@ final class FileManager {
             .appendingPathComponent("Resources", isDirectory: true)
             .appendingPathComponent("privateKey.pem", isDirectory: false))
     }
+    
+    func pushCertificateURL()  -> URL {
+        if Environment.IS_PRODUCTION_ENVIRONMENT {
+            //TODO: Add url for production certificate
+        }
+        return URL(fileURLWithPath: directory.workDir)
+            .appendingPathComponent("Resources", isDirectory: true)
+            .appendingPathComponent("aps_development.pem", isDirectory: false)
+    }
 }

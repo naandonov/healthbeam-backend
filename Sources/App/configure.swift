@@ -24,8 +24,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(SessionsMiddleware.self)
     services.register(middlewares)
     
+    services.register(Shell.self)
+    
     let postgresqlConfig: PostgreSQLDatabaseConfig
-    if let url = Environment.get("DATABASE_URL") {
+    if let url = Environment.DATABASE_URL {
         postgresqlConfig = PostgreSQLDatabaseConfig(url: url)!
     }
     else {
