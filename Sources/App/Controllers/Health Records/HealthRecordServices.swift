@@ -11,18 +11,18 @@ import FluentPostgreSQL
 
 class HealthRecordServices {
     
-    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Request) throws -> Future<HealthRecord.Public> {
+    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Request) throws -> Future<ResultParser<HealthRecord.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
             let record = try recordRequest.model(with: patient.requireID())
             try record.userId = user.requireID()
             return record.save(on: request).map{ _ in
-                try record.mapToPublic(creator: user)
+                try record.mapToPublic(creator: user).parse()
             }
         }
     }
     
-    class func getHealthRecords(request: Request) throws -> Future<[HealthRecord.Public]> {
+    class func getHealthRecords(request: Request) throws -> Future<ArrayResultParser<HealthRecord.Public>> {
         _ = try request.requireAuthenticated(User.self)
         //TODO: Currently if the user get deleted the health record won't be fetched
         return try request.parameters.next(Patient.self).flatMap { patient in
@@ -35,7 +35,7 @@ class HealthRecordServices {
                     return try joinedTable.map {
                         let record = $0.0
                         return try record.mapToPublic(creator: $0.1)
-                    }
+                    }.parse()
                 })
         }
     }
