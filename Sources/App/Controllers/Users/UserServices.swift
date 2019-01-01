@@ -13,14 +13,14 @@ class UserServices {
     
     //MARK: - Client Services
     
-    class func getUserInfo(_ request: Request) throws -> Future<User.Public> {
+    class func getUserInfo(_ request: Request) throws -> Future<ResultWrapper<User.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return Future.map(on: request, {
-            return try user.mapToPublic()
+            return try user.mapToPublic().parse()
         })
     }
     
-    class func subscribeToPatient(_ request: Request) throws -> Future<HTTPResponse> {
+    class func subscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
         return try request.content.decode(Patient.Subscribtion.self).flatMap { subscriptionRequest in
             let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
             let user = try request.requireAuthenticated(User.self)
@@ -36,16 +36,16 @@ class UserServices {
                         .flatMap({ existingSubscriber in
                             if let _ = existingSubscriber {
                                 return Future.map(on: request, {
-                                    return HTTPResponse(status: .ok)
+                                    return FormattedResultWrapper(result: .success)
                                 })
                             }
-                            return user.patientSubscriptions.attach(patient, on: request).transform(to: HTTPResponse(status: .created))
+                            return user.patientSubscriptions.attach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
                         })
             }
         }
     }
     
-    class func unsubscribeToPatient(_ request: Request) throws -> Future<HTTPResponse> {
+    class func unsubscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
         return try request.content.decode(Patient.Subscribtion.self).flatMap { subscriptionRequest in
             let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
             let user = try request.requireAuthenticated(User.self)
@@ -55,14 +55,20 @@ class UserServices {
                 .filter(\Patient.id, .equal, subscriptionRequest.patientId)
                 .first()
                 .unwrap(or: notFound).flatMap{ patient in
-                    user.patientSubscriptions.detach(patient, on: request).transform(to: HTTPResponse(status: .ok))
+                    user.patientSubscriptions.detach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
             }
         }
     }
     
-    class func getPatientSubscriptions(_ request: Request) throws -> Future<[Patient]> {
+    class func getPatientSubscriptions(_ request: Request) throws -> Future<ArrayResultWrapper<Patient>> {
         let user = try request.requireAuthenticated(User.self)
-        return try user.patientSubscriptions.query(on: request).all()
+        return try user
+            .patientSubscriptions
+            .query(on: request)
+            .all()
+            .map { patients in
+                return patients.parse()
+        }
     }
     
     class func saveDeviceToken(_ request: Request) throws -> Future<HTTPStatus> {

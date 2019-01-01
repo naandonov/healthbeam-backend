@@ -8,10 +8,18 @@
 import Foundation
 import Vapor
 
-struct ResultParser<T: Content>: Content {
+struct ResultWrapper<T: Content>: Content {
     let result: T?
 }
 
-struct ArrayResultParser<T: Content>: Content {
+struct FormattedResultWrapper: Content {
+    enum Result: String, Content {
+        case success = "success"
+        case faliure = "faliure"
+    }
+    let result: Result?
+}
+
+struct ArrayResultWrapper<T: Content>: Content {
     let result: [T]?
 }

@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 
 extension Array where Element: Content {
-    func parse() -> ArrayResultParser<Element> {
-        return ArrayResultParser(result: self)
+    func parse() -> ArrayResultWrapper<Element> {
+        return ArrayResultWrapper(result: self)
     }
 }

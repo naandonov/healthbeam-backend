@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 
 extension Content {
-    func parse() -> ResultParser<Self> {
-        return ResultParser(result: self)
+    func parse() -> ResultWrapper<Self> {
+        return ResultWrapper(result: self)
     }
 }

@@ -29,7 +29,7 @@ class AuthenticationServices {
         }
     }
     
-    class func login(_ request: Request) throws -> Future<TokenRecord> {
+    class func login(_ request: Request) throws -> Future<ResultWrapper<TokenRecord.Public>> {
         return try request.content.decode(User.Login.self).flatMap { userLogin in
             return User.query(on: request)
                 .filter(\.email == userLogin.email)
@@ -44,7 +44,9 @@ class AuthenticationServices {
                             .flatMap { _ in
                                 let tokenString = try URandom().generateData(count: 32).base64EncodedString()
                                 let token = try TokenRecord(token: tokenString, userId: existingUser.requireID())
-                                return token.save(on: request)
+                                return token.save(on: request).map { token in
+                                    token.mapToPublic().parse()
+                                }
                         }
                     } else {
                         throw Abort(.notFound, reason: "Invalid credentials")
@@ -53,9 +55,14 @@ class AuthenticationServices {
         }
     }
     
-    class func logout(_ request: Request) throws -> Future<HTTPResponse> {
+    class func logout(_ request: Request) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
-        return try logoutHelper(request, user: user)
+        return try logoutHelper(request, user: user).map{ response  in
+            if response.status == .ok {
+                return FormattedResultWrapper(result: .success)
+            }
+            return FormattedResultWrapper(result: .faliure)
+        }
     }
     
     private class func logoutHelper(_ request: Request, user: User) throws -> Future<HTTPResponse> {
