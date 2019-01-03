@@ -25,6 +25,15 @@ final class User: Content {
         var email: String
         var discoveryRegions: [String]
         var accountType: String?
+        var hospital: Hospital.Public?
+    }
+    
+    struct Registration: Content {
+        var email: String
+        var password: String
+        var fullName: String
+        var designation: String
+        var discoveryRegions: [String]
     }
     
     struct Login: Content {
@@ -40,22 +49,26 @@ final class User: Content {
     var discoveryRegions: [String]
     var accountType: String?
     
-    init(fullName: String, designation: String, email: String, password: String, discoveryRegions: [String] = []) {
+    var hospitalId: Hospital.ID
+    
+    init(fullName: String, designation: String, email: String, password: String, discoveryRegions: [String] = [], hospitalId: Hospital.ID, accountType: String?) {
         self.fullName = fullName
         self.designation = designation
         self.email = email
         self.password = password
         self.discoveryRegions = discoveryRegions
-        accountType = "standard"
+        self.hospitalId = hospitalId
+        self.accountType = accountType
     }
     
-    func mapToPublic() throws -> User.Public {
+    func mapToPublic(hospital: Hospital? = nil) throws -> User.Public {
         return try User.Public(id: self.requireID(),
                                fullName: fullName,
                                designation: designation,
                                email: email,
                                discoveryRegions: discoveryRegions,
-                               accountType: accountType)
+                               accountType: accountType,
+                               hospital: hospital?.mapToPublic())
     }
     
     func mapToExternalPublic() throws -> User.ExternalPublic {
@@ -73,6 +86,10 @@ extension User {
     
     var userDevice: Children<User, Device> {
         return children(\.userId)
+    }
+    
+    var hospital: Parent<User, Hospital> {
+        return parent(\.hospitalId)
     }
 }
 

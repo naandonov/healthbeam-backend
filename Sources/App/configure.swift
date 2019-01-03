@@ -32,10 +32,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     }
     else {
         postgresqlConfig = PostgreSQLDatabaseConfig(
-            serverAddress: PostgreSQLConnection.ServerAddress.tcp(hostname: "baasu.db.elephantsql.com", port: 5432),
-            username: "vdwegziv",
-            database: "vdwegziv",
-            password: "WSDEkQDZdenEafNbJGoyCc80N02Jq391"
+            hostname: "localhost",
+            username: "nikolay.andonov",
+            database: "healthbeam",
+            password: nil
         )
     }
     
@@ -57,6 +57,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: PatientTag.self, database: .psql)
     migrations.add(model: PatientAlert.self, database: .psql)
     migrations.add(model: Device.self, database: .psql)
+     migrations.add(model: Hospital.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

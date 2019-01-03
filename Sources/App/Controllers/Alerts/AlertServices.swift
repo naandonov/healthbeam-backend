@@ -106,6 +106,7 @@ class AlertServices {
             .filter(\.id == subscription.patientId)
             .first()
             .unwrap(or: notFound).flatMap({ (patient: Patient) in
+                try PatientServices.validateInteraction(for: user, with: patient)
                 return PatientAlert
                     .query(on: request)
                     .join(\Patient.id, to: \PatientAlert.patientId)
@@ -141,10 +142,11 @@ class AlertServices {
     }
     
     class func getAlertRecords(_ request: Request) throws -> Future<[PatientAlert.Record]> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return PatientAlert
             .query(on: request)
             .join(\Patient.id, to: \PatientAlert.patientId)
+            .filter(\Patient.hospitalId == user.hospitalId)
             .alsoDecode(Patient.self)
             .join(\User.id, to: \PatientAlert.responderId)
             .alsoDecode(User.self)

@@ -13,11 +13,14 @@ class PatientTagServices {
     
     
     class func assignPatientTag(request: Request, patientTag: PatientTag) throws -> Future<PatientTag> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
-            PatientTag.query(on: request)
+            try PatientServices.validateInteraction(for: user, with: patient)
+            return PatientTag.query(on: request)
                 .filter(\.major == patientTag.major)
                 .filter(\.minor == patientTag.minor)
+                .join(\Patient.id, to: \PatientTag.patientId)
+                .filter(\Patient.hospitalId == user.hospitalId)
                 .first()
                 .flatMap({ existingPatientTag in
                     if let existingPatientTag = existingPatientTag {
@@ -45,8 +48,9 @@ class PatientTagServices {
     }
     
     class func unassignPatientTag(request: Request) throws -> Future<HTTPStatus> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
+            try PatientServices.validateInteraction(for: user, with: patient)
             return try unassignPatientTag(for: patient, on: request)
         }
     }
@@ -78,8 +82,9 @@ class PatientTagServices {
     }
     
     class func getPatientTag(request: Request) throws -> Future<PatientTag> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
+            try PatientServices.validateInteraction(for: user, with: patient)
             let notFound = Abort(.badRequest, reason: "The Specified Patient doesn't have an associated Tag")
             return try patient.patientTag
                 .query(on: request)

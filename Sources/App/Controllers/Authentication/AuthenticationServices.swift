@@ -16,13 +16,21 @@ class AuthenticationServices {
     //MARK: - Client Services
     
     class func register(_ request: Request) throws -> Future<User.Public> {
-        return try request.content.decode(User.self).flatMap { user in
-            return User.query(on: request).filter(\.email == user.email).first().flatMap { existingUser -> Future<User.Public> in
+        let user = try request.requireAuthenticated(User.self)
+        return try request.content.decode(User.Registration.self).flatMap { userInput in
+            return User.query(on: request).filter(\.email == userInput.email).first().flatMap { existingUser -> Future<User.Public> in
                 if let _ = existingUser {
                     throw Abort(.badRequest, reason: "Registration for '\(user.email)' already exists")
                 }
-                user.password = try BCryptDigest().hash(user.password)
-                return user.save(on: request).map { newUser in
+                let privateUser = User(fullName: userInput.fullName,
+                                       designation: userInput.designation,
+                                       email: userInput.email,
+                                       password: try BCryptDigest().hash(userInput.password),
+                                       discoveryRegions: userInput.discoveryRegions,
+                                       hospitalId: user.hospitalId,
+                                       accountType: "standard")
+                
+                return privateUser.save(on: request).map { newUser in
                     return try newUser.mapToPublic()
                 }
             }
@@ -80,7 +88,22 @@ class AuthenticationServices {
     
     //MARK: - Web Services
     
+    class func renderRegistration(_ request: Request) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        
+        return user
+            .hospital
+            .query(on: request)
+            .first()
+            .unwrap(or: Abort(.badRequest, reason: "Missing required data"))
+            .flatMap { hospital in
+                let context = try ["hospital": hospital.mapToPublic()]
+                return try request.view().render("create-account", context)
+        }
+    }
+    
     class func webRegister(_ request: Request) throws -> Future<Response> {
+        _ = try request.requireAuthenticated(User.self)
         
         return try register(request).map(to: Response.self, { _ -> Response in
             request.redirect(to: WebConstants.HomeDirectory)

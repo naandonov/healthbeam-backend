@@ -25,9 +25,9 @@ final class Patient: Content {
         var alergies: [String]
         var premiseLocation: String
         var patientTag: PatientTag.Public?
-        var healthRecords: [HealthRecord]?
+        var healthRecords: [HealthRecord.Public]?
         
-        func privateModel() -> Patient {
+        func creationModel(hospitalId: Hospital.ID) -> Patient {
             return Patient(id: id,
                            fullName: fullName,
                            gender: gender,
@@ -35,7 +35,8 @@ final class Patient: Content {
                            birthDate: birthDate,
                            bloodType: bloodType,
                            alergies: alergies,
-                           premiseLocation: premiseLocation)
+                           premiseLocation: premiseLocation,
+                           hospitalId: hospitalId)
         }
     }
     
@@ -51,8 +52,10 @@ final class Patient: Content {
     
     var patientTagId: PatientTag.ID?
     
+    var hospitalId: Hospital.ID
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String) {
+    
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String, hospitalId: Hospital.ID) {
         
         self.fullName = fullName
         self.gender = gender
@@ -61,6 +64,17 @@ final class Patient: Content {
         self.bloodType = bloodType
         self.alergies = alergies
         self.premiseLocation = premiseLocation
+        self.hospitalId = hospitalId
+    }
+    
+    func updateFromPublic(_ publicPatient: Public) {
+       fullName = publicPatient.fullName
+       gender = publicPatient.gender
+       personalIdentification = publicPatient.personalIdentification
+       birthDate = publicPatient.birthDate
+       bloodType = publicPatient.bloodType
+       alergies = publicPatient.alergies
+       premiseLocation = publicPatient.premiseLocation
     }
 }
 
@@ -92,6 +106,10 @@ extension Patient {
     
     var observers: Siblings<Patient, User, UserPatient> {
         return siblings()
+    }
+    
+    var hospital: Parent<Patient, Hospital> {
+        return parent(\.hospitalId)
     }
 }
 

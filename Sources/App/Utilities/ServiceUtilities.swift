@@ -20,8 +20,9 @@ struct QueryCount: Content {
 }
 
 enum BatchQueryConfiguration {
-    case filter(keyName: String)
+    case searchQuery(keyName: String)
     case sort(keyName: String, isAscending: Bool)
+    case filter(keyValuePairs: [String: String])
 }
 
 enum CRUDOperationSelector {
@@ -91,19 +92,36 @@ class ServiceUtilities {
         }
     }
     
-    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, queryConfigurations: [BatchQueryConfiguration] = [], elementsInPage: Int = 20) where T: PublicMapper {
+    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, elementsInPage: Int = 20, userFilterClosure: ((User) -> [BatchQueryConfiguration])? = nil) where T: PublicMapper {
         router.get() { request -> Future<BatchWrapper<T.PublicElement>> in
-            _ = try request.requireAuthenticated(User.self)
+            let user = try request.requireAuthenticated(User.self)
             
             let tableName = String(describing: T.self)
             var searchQuery = " FROM \"\(tableName)\""
             
+            var queryConfigurations: [BatchQueryConfiguration] = []
+            if let userFilterClosure = userFilterClosure {
+                queryConfigurations += userFilterClosure(user)
+            }
+            
             for configuration in queryConfigurations {
                 switch configuration {
                     
-                case let .filter(keyName):
+                case let .searchQuery(keyName):
                     if let searchParameter = request.query[String.self, at: "search"] {
                         searchQuery += " WHERE LOWER(\"\(keyName)\") LIKE LOWER('%\(searchParameter)%')"
+                    }
+                case .filter(let keyValuePairs):
+                    var appendStatement: String
+                    if searchQuery.contains("WHERE") {
+                        appendStatement = " AND"
+                    }
+                    else {
+                        appendStatement = " WHERE"
+                    }
+                    for (key, value) in keyValuePairs {
+                        searchQuery += "\(appendStatement) \"\(key)\" = '\(value)'"
+                        appendStatement = "AND"
                     }
                 case let .sort(keyName, isAscending):
                     searchQuery += " ORDER BY (\"\(keyName)\") \(isAscending ? "ASC" : "DESC")"

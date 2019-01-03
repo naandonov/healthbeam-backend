@@ -11,10 +11,11 @@ import FluentPostgreSQL
 
 class HealthRecordServices {
     
-    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Request) throws -> Future<ResultWrapper<HealthRecord.Public>> {
+    class func createHealthRecord(request: Request, recordRequest: HealthRecord.Public) throws -> Future<ResultWrapper<HealthRecord.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
-            let record = try recordRequest.model(with: patient.requireID())
+            try PatientServices.validateInteraction(for: user, with: patient)
+            let record = try recordRequest.creationModel(with: patient.requireID())
             try record.userId = user.requireID()
             return record.save(on: request).map{ _ in
                 try record.mapToPublic(creator: user).parse()
@@ -23,10 +24,11 @@ class HealthRecordServices {
     }
     
     class func getHealthRecords(request: Request) throws -> Future<ArrayResultWrapper<HealthRecord.Public>> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         //TODO: Currently if the user get deleted the health record won't be fetched
         return try request.parameters.next(Patient.self).flatMap { patient in
-            try patient.healthRecords
+            try PatientServices.validateInteraction(for: user, with: patient)
+            return try patient.healthRecords
                 .query(on: request)
                 .join(\User.id, to: \HealthRecord.userId)
                 .alsoDecode(User.self)
@@ -35,14 +37,15 @@ class HealthRecordServices {
                     return try joinedTable.map {
                         let record = $0.0
                         return try record.mapToPublic(creator: $0.1)
-                    }.parse()
+                        }.parse()
                 })
         }
     }
     
-    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Request)throws -> Future<HTTPStatus> {
-        _ = try request.requireAuthenticated(User.self)
+    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Public)throws -> Future<HTTPStatus> {
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
+            try PatientServices.validateInteraction(for: user, with: patient)
             
             guard let healthRecordId = recordRequest.id else {
                 throw Abort(.badRequest, reason: "Missing Health Record Id")
@@ -50,8 +53,8 @@ class HealthRecordServices {
             let notFound = try Abort(.notFound, reason: "No record with ID '\(healthRecordId)' found for patient '\(patient.requireID())'")
             
             return try patient.healthRecords.query(on: request).filter(\.id == healthRecordId).first().unwrap(or: notFound).flatMap({ record  in
-                return try recordRequest
-                    .model(with: patient.requireID())
+                record.updateFromPublic(recordRequest)
+                return record
                     .update(on: request)
                     .transform(to: .ok)
             })
@@ -59,8 +62,10 @@ class HealthRecordServices {
     }
     
     class func deleteRecord(request: Request) throws -> Future<HTTPStatus> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
+            try PatientServices.validateInteraction(for: user, with: patient)
+            
             let healthRecordId = try request.parameters.next(HealthRecord.ID.self)
             return try patient.healthRecords
                 .query(on: request)

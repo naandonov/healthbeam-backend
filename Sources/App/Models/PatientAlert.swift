@@ -36,19 +36,20 @@ final class PatientAlert: Content {
         var creationDate: String
         var respondDate: String?
         var status: String
+        var notes: String?
         
         var patient: Patient.Public
         var responder: User.ExternalPublic?
         
         
         init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil) throws {
-            self.id = try patientAlert.requireID()
-            self.creationDate = patientAlert.creationDate.extendedDateString()
+            id = try patientAlert.requireID()
+            creationDate = patientAlert.creationDate.extendedDateString()
             if let respondDate = patientAlert.respondDate {
                 self.respondDate = respondDate.extendedDateString()
             }
-            self.status = patientAlert.status
-            
+            status = patientAlert.status
+            notes = patientAlert.notes
             self.patient = try patient.mapToPublic()
             if let responder = responder {
                 self.responder = try responder.mapToExternalPublic()
@@ -65,6 +66,7 @@ final class PatientAlert: Content {
     var creationDate: Date
     var respondDate: Date?
     var status: String
+    var notes: String?
     
     var patientId: Patient.ID?
     var responderId: User.ID?

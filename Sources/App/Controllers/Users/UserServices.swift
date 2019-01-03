@@ -15,9 +15,14 @@ class UserServices {
     
     class func getUserInfo(_ request: Request) throws -> Future<ResultWrapper<User.Public>> {
         let user = try request.requireAuthenticated(User.self)
-        return Future.map(on: request, {
-            return try user.mapToPublic().parse()
-        })
+        return user
+            .hospital
+            .query(on: request)
+            .first()
+            .map { hospital in
+                return try user.mapToPublic(hospital: hospital).parse()
+                
+        }
     }
     
     class func subscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
@@ -29,7 +34,7 @@ class UserServices {
                 .filter(\Patient.id, .equal, subscriptionRequest.patientId)
                 .first()
                 .unwrap(or: notFound).flatMap{ patient in
-                    
+                    try PatientServices.validateInteraction(for: user, with: patient)
                     return try user.patientSubscriptions.query(on: request)
                         .filter(\.id == patient.requireID())
                         .first()
@@ -55,7 +60,8 @@ class UserServices {
                 .filter(\Patient.id, .equal, subscriptionRequest.patientId)
                 .first()
                 .unwrap(or: notFound).flatMap{ patient in
-                    user.patientSubscriptions.detach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
+                    try PatientServices.validateInteraction(for: user, with: patient)
+                    return user.patientSubscriptions.detach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
             }
         }
     }
@@ -65,6 +71,7 @@ class UserServices {
         return try user
             .patientSubscriptions
             .query(on: request)
+            .filter(\.hospitalId == user.hospitalId)
             .all()
             .map { patients in
                 return patients.parse()

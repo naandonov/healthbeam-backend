@@ -14,9 +14,9 @@ class ClientHealthRecordsController: RouteCollection {
         
         let healthRecordsRouter = router.grouped("patients", Patient.parameter, "healthRecords").authorizedRouter()
 
-        healthRecordsRouter.post(HealthRecord.Request.self, use: HealthRecordServices.createHealthRecord)
+        healthRecordsRouter.post(HealthRecord.Public.self, use: HealthRecordServices.createHealthRecord)
         healthRecordsRouter.get(use: HealthRecordServices.getHealthRecords)
-        healthRecordsRouter.put(HealthRecord.Request.self, at: "/", use: HealthRecordServices.updateHealthRecord)
+        healthRecordsRouter.put(HealthRecord.Public.self, at: "/", use: HealthRecordServices.updateHealthRecord)
         healthRecordsRouter.delete(HealthRecord.ID.parameter, use: HealthRecordServices.deleteRecord)
     }
 }
