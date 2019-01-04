@@ -93,7 +93,7 @@ class ServiceUtilities {
     }
     
     class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, elementsInPage: Int = 20, userFilterClosure: ((User) -> [BatchQueryConfiguration])? = nil) where T: PublicMapper {
-        router.get() { request -> Future<BatchWrapper<T.PublicElement>> in
+        router.get() { request -> Future<ResultWrapper<BatchWrapper<T.PublicElement>>> in
             let user = try request.requireAuthenticated(User.self)
             
             let tableName = String(describing: T.self)
@@ -124,7 +124,7 @@ class ServiceUtilities {
                         appendStatement = "AND"
                     }
                 case let .sort(keyName, isAscending):
-                    searchQuery += " ORDER BY (\"\(keyName)\") \(isAscending ? "ASC" : "DESC")"
+                    searchQuery += " GROUP BY id ORDER BY \"\(keyName)\" \(isAscending ? "ASC" : "DESC")"
                 }
             }
             
@@ -143,7 +143,8 @@ class ServiceUtilities {
                                                 elementsInPage: 0,
                                                 totalPagesCount: 0,
                                                 totalElementsCount: 0,
-                                                result: [])
+                                                items: [])
+                                .parse()
                         }
                     }
                     
@@ -169,7 +170,8 @@ class ServiceUtilities {
                                                 elementsInPage: elements.count,
                                                 totalPagesCount: pagesCount,
                                                 totalElementsCount: elementsCount,
-                                                result: result)
+                                                items: result)
+                                .parse()
                     }
             }
         }

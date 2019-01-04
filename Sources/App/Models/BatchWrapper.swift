@@ -16,14 +16,14 @@ final class BatchWrapper<T: Content>: Content {
     let totalPagesCount: Int
     let totalElementsCount: Int
     
-    let result: [T]
+    let items: [T]
     
-    init(currentPage: Int, elementsInPage: Int, totalPagesCount: Int, totalElementsCount: Int, result: [T]) {
+    init(currentPage: Int, elementsInPage: Int, totalPagesCount: Int, totalElementsCount: Int, items: [T]) {
         self.currentPage = currentPage
         self.elementsInPage = elementsInPage
         self.totalPagesCount = totalPagesCount
         self.totalElementsCount = totalElementsCount
-        self.result = result
+        self.items = items
     }
     
 }

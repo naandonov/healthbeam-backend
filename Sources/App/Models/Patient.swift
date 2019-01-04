@@ -14,7 +14,7 @@ final class Patient: Content {
     struct Subscribtion: Content {
         var patientId: Int
     }
-    
+    iew
     struct Public: Content {
         var id: Int?
         var fullName: String
@@ -24,8 +24,8 @@ final class Patient: Content {
         var bloodType: String
         var alergies: [String]
         var premiseLocation: String
-        var patientTag: PatientTag.Public?
-        var healthRecords: [HealthRecord.Public]?
+//        var patientTag: PatientTag.Public?
+//        var healthRecords: [HealthRecord.Public]?
         
         func creationModel(hospitalId: Hospital.ID) -> Patient {
             return Patient(id: id,
@@ -89,9 +89,7 @@ extension Patient: PublicMapper {
                                   birthDate: birthDate,
                                   bloodType: bloodType,
                                   alergies: alergies,
-                                  premiseLocation: premiseLocation,
-                                  patientTag: nil,
-                                  healthRecords: nil)
+                                  premiseLocation: premiseLocation)
     }
 }
 

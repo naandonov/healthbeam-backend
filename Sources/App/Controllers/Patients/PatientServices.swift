@@ -88,6 +88,31 @@ class PatientServices {
             })
     }
     
+    class func getPatientAttributes(_ request: Request) throws -> Future<ResultWrapper<PatientAttributes>> {
+        let user = try request.requireAuthenticated(User.self)
+        return try request
+            .parameters
+            .next(Patient.self).flatMap{ patient in
+                try validateInteraction(for: user, with: patient)
+                return try patient
+                    .healthRecords
+                    .query(on: request)
+                    .all()
+                    .flatMap { healthRecords in
+                        
+                        try patient
+                            .patientTag
+                            .query(on: request)
+                            .first()
+                            .map { patientTag -> ResultWrapper<PatientAttributes> in
+                                let patientAttributes = PatientAttributes(healthRecords: healthRecords, patientTag: patientTag)
+                                return patientAttributes.parse()
+                        }
+                        
+                }
+        }
+    }
+    
     //    class func searchPatients(_ request: Request) throws -> Future<[Patient.Public]> {
     //        _ = try request.requireAuthenticated(User.self)
     //        guard let searchQuery = request.query[String.self, at: "search"] else {
