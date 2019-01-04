@@ -98,6 +98,7 @@ class ServiceUtilities {
             
             let tableName = String(describing: T.self)
             var searchQuery = " FROM \"\(tableName)\""
+            var sortQuery = ""
             
             var queryConfigurations: [BatchQueryConfiguration] = []
             if let userFilterClosure = userFilterClosure {
@@ -124,12 +125,12 @@ class ServiceUtilities {
                         appendStatement = "AND"
                     }
                 case let .sort(keyName, isAscending):
-                    searchQuery += " GROUP BY id ORDER BY \"\(keyName)\" \(isAscending ? "ASC" : "DESC")"
+                    sortQuery = " GROUP BY id ORDER BY \"\(keyName)\" \(isAscending ? "ASC" : "DESC")"
                 }
             }
             
             let countQuery = "SELECT COUNT(id)" + searchQuery
-            var resultsQuery = "SELECT *" + searchQuery
+            var resultsQuery = "SELECT *" + searchQuery + sortQuery
             
             return request.withNewConnection(to: .psql) { connection in
                 return connection

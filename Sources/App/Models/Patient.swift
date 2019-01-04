@@ -14,7 +14,7 @@ final class Patient: Content {
     struct Subscribtion: Content {
         var patientId: Int
     }
-    iew
+    
     struct Public: Content {
         var id: Int?
         var fullName: String
