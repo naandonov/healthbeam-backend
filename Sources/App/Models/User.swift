@@ -25,7 +25,7 @@ final class User: Content {
         var email: String
         var discoveryRegions: [String]
         var accountType: String?
-        var hospital: Hospital.Public?
+        var premise: Premise.Public?
     }
     
     struct Registration: Content {
@@ -49,26 +49,26 @@ final class User: Content {
     var discoveryRegions: [String]
     var accountType: String?
     
-    var hospitalId: Hospital.ID
+    var premiseId: Premise.ID
     
-    init(fullName: String, designation: String, email: String, password: String, discoveryRegions: [String] = [], hospitalId: Hospital.ID, accountType: String?) {
+    init(fullName: String, designation: String, email: String, password: String, discoveryRegions: [String] = [], premiseId: Premise.ID, accountType: String?) {
         self.fullName = fullName
         self.designation = designation
         self.email = email
         self.password = password
         self.discoveryRegions = discoveryRegions
-        self.hospitalId = hospitalId
+        self.premiseId = premiseId
         self.accountType = accountType
     }
     
-    func mapToPublic(hospital: Hospital? = nil) throws -> User.Public {
+    func mapToPublic(premise: Premise? = nil) throws -> User.Public {
         return try User.Public(id: self.requireID(),
                                fullName: fullName,
                                designation: designation,
                                email: email,
                                discoveryRegions: discoveryRegions,
                                accountType: accountType,
-                               hospital: hospital?.mapToPublic())
+                               premise: premise?.mapToPublic())
     }
     
     func mapToExternalPublic() throws -> User.ExternalPublic {
@@ -88,8 +88,8 @@ extension User {
         return children(\.userId)
     }
     
-    var hospital: Parent<User, Hospital> {
-        return parent(\.hospitalId)
+    var premise: Parent<User, Premise> {
+        return parent(\.premiseId)
     }
 }
 

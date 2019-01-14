@@ -19,7 +19,7 @@
                 <h2 class="sr-only">Login Form</h2>
                 <h2 class="text-center">Create Account</h2>
                 <div class="illustration"></div>
-                <div class="form-group"><input class="form-control" aria-describedby="inputGroupPrepend" value="#(hospital.name)" disabled/></div>
+                <div class="form-group"><input class="form-control" aria-describedby="inputGroupPrepend" value="#(premise.name)" disabled/></div>
                 <div class="form-group"><input name="fullName" placeholder="Full Name" minlength="2" required class="form-control" aria-describedby="inputGroupPrepend" required/></div>
                 <div class="form-group"><input name="designation" required placeholder="Designation" minlength="2" class="form-control" aria-describedby="inputGroupPrepend" required/></div>
                 <div class="form-group"><input class="form-control" type="email" name="email" required="" placeholder="Email" minlength="2" inputmode="email" aria-describedby="inputGroupPrepend" required></div>

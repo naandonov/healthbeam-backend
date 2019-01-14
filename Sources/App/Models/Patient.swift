@@ -27,7 +27,7 @@ final class Patient: Content {
 //        var patientTag: PatientTag.Public?
 //        var healthRecords: [HealthRecord.Public]?
         
-        func creationModel(hospitalId: Hospital.ID) -> Patient {
+        func creationModel(premiseId: Premise.ID) -> Patient {
             return Patient(id: id,
                            fullName: fullName,
                            gender: gender,
@@ -36,7 +36,7 @@ final class Patient: Content {
                            bloodType: bloodType,
                            alergies: alergies,
                            premiseLocation: premiseLocation,
-                           hospitalId: hospitalId)
+                           premiseId: premiseId)
         }
     }
     
@@ -52,10 +52,10 @@ final class Patient: Content {
     
     var patientTagId: PatientTag.ID?
     
-    var hospitalId: Hospital.ID
+    var premiseId: Premise.ID
     
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String, hospitalId: Hospital.ID) {
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String, premiseId: Premise.ID) {
         
         self.fullName = fullName
         self.gender = gender
@@ -64,7 +64,7 @@ final class Patient: Content {
         self.bloodType = bloodType
         self.alergies = alergies
         self.premiseLocation = premiseLocation
-        self.hospitalId = hospitalId
+        self.premiseId = premiseId
     }
     
     func updateFromPublic(_ publicPatient: Public) {
@@ -106,8 +106,8 @@ extension Patient {
         return siblings()
     }
     
-    var hospital: Parent<Patient, Hospital> {
-        return parent(\.hospitalId)
+    var premise: Parent<Patient, Premise> {
+        return parent(\.premiseId)
     }
 }
 

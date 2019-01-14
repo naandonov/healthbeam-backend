@@ -20,7 +20,7 @@ class PatientTagServices {
                 .filter(\.major == patientTag.major)
                 .filter(\.minor == patientTag.minor)
                 .join(\Patient.id, to: \PatientTag.patientId)
-                .filter(\Patient.hospitalId == user.hospitalId)
+                .filter(\Patient.premiseId == user.premiseId)
                 .first()
                 .flatMap({ existingPatientTag in
                     if let existingPatientTag = existingPatientTag {

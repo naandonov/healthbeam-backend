@@ -57,7 +57,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: PatientTag.self, database: .psql)
     migrations.add(model: PatientAlert.self, database: .psql)
     migrations.add(model: Device.self, database: .psql)
-     migrations.add(model: Hospital.self, database: .psql)
+     migrations.add(model: Premise.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

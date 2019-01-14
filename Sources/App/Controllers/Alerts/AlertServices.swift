@@ -146,7 +146,7 @@ class AlertServices {
         return PatientAlert
             .query(on: request)
             .join(\Patient.id, to: \PatientAlert.patientId)
-            .filter(\Patient.hospitalId == user.hospitalId)
+            .filter(\Patient.premiseId == user.premiseId)
             .alsoDecode(Patient.self)
             .join(\User.id, to: \PatientAlert.responderId)
             .alsoDecode(User.self)

@@ -1,5 +1,5 @@
 //
-//  Hospital.swift
+//  Premise.swift
 //  App
 //
 //  Created by Nikolay Andonov on 3.01.19.
@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import FluentPostgreSQL
 
-final class Hospital: Content {
+final class Premise: Content {
     
     struct Public: Content {
         var id: Int?
@@ -32,6 +32,6 @@ final class Hospital: Content {
 
 }
 
-extension Hospital: Migration {}
-extension Hospital: Parameter {}
-extension Hospital: PostgreSQLModel {}
+extension Premise: Migration {}
+extension Premise: Parameter {}
+extension Premise: PostgreSQLModel {}

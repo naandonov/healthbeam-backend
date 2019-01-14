@@ -15,7 +15,7 @@ class ClientPatientsController: RouteCollection {
         let patientsRouter = router.grouped("patients").authorizedRouter()
 //        ServiceUtilities.generateOperations(router: patientsRouter, for: Patient.self, requireAuthorization: true, operationsSelector: .getAll)
         ServiceUtilities.generateBatchOperation(router: patientsRouter, type: Patient.self) { user in
-            return [.searchQuery(keyName: "fullName"), .filter(keyValuePairs:["hospitalId" : "\(user.hospitalId)"]), .sort(keyName: "fullName", isAscending: true)]
+            return [.searchQuery(keyName: "fullName"), .filter(keyValuePairs:["premiseId" : "\(user.premiseId)"]), .sort(keyName: "fullName", isAscending: true)]
         }
         
         patientsRouter.delete(Patient.parameter, use: PatientServices.deletePatient)

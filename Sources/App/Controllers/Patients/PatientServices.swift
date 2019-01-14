@@ -21,7 +21,7 @@ class PatientServices {
                 if let _ = patient {
                     throw Abort(.badRequest, reason: "Patient with the provided personal identification already exists.")
                 }
-                let privatePatient = patientRequest.creationModel(hospitalId: user.hospitalId)
+                let privatePatient = patientRequest.creationModel(premiseId: user.premiseId)
                 return privatePatient
                     .save(on: request)
                     .map{ privateModel in
@@ -151,14 +151,14 @@ class PatientServices {
 extension PatientServices {
     
     class func validateInteraction(for user: User, with patient: Patient) throws {
-        if user.hospitalId != patient.hospitalId {
-            throw Abort(.methodNotAllowed, reason: "Unable to interact with patients outside of your hospital")
+        if user.premiseId != patient.premiseId {
+            throw Abort(.methodNotAllowed, reason: "Unable to interact with patients outside of your premise")
         }
     }
     
     class func accessiblePatients(on request: Request, for user: User) -> QueryBuilder<PostgreSQLDatabase, Patient> {
         return Patient
             .query(on: request)
-            .filter(\.hospitalId == user.hospitalId)
+            .filter(\.premiseId == user.premiseId)
     }
 }

@@ -27,7 +27,7 @@ class AuthenticationServices {
                                        email: userInput.email,
                                        password: try BCryptDigest().hash(userInput.password),
                                        discoveryRegions: userInput.discoveryRegions,
-                                       hospitalId: user.hospitalId,
+                                       premiseId: user.premiseId,
                                        accountType: "standard")
                 
                 return privateUser.save(on: request).map { newUser in
@@ -92,12 +92,12 @@ class AuthenticationServices {
         let user = try request.requireAuthenticated(User.self)
         
         return user
-            .hospital
+            .premise
             .query(on: request)
             .first()
             .unwrap(or: Abort(.badRequest, reason: "Missing required data"))
-            .flatMap { hospital in
-                let context = try ["hospital": hospital.mapToPublic()]
+            .flatMap { premise in
+                let context = try ["hospital": premise.mapToPublic()]
                 return try request.view().render("create-account", context)
         }
     }

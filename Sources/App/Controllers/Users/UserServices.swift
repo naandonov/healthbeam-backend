@@ -16,11 +16,11 @@ class UserServices {
     class func getUserInfo(_ request: Request) throws -> Future<ResultWrapper<User.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return user
-            .hospital
+            .premise
             .query(on: request)
             .first()
-            .map { hospital in
-                return try user.mapToPublic(hospital: hospital).parse()
+            .map { premise in
+                return try user.mapToPublic(premise: premise).parse()
                 
         }
     }
@@ -71,7 +71,7 @@ class UserServices {
         return try user
             .patientSubscriptions
             .query(on: request)
-            .filter(\.hospitalId == user.hospitalId)
+            .filter(\.premiseId == user.premiseId)
             .all()
             .map { patients in
                 return patients.parse()
