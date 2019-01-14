@@ -19,8 +19,8 @@ class AuthenticationServices {
         let user = try request.requireAuthenticated(User.self)
         return try request.content.decode(User.Registration.self).flatMap { userInput in
             return User.query(on: request).filter(\.email == userInput.email).first().flatMap { existingUser -> Future<User.Public> in
-                if let _ = existingUser {
-                    throw Abort(.badRequest, reason: "Registration for '\(user.email)' already exists")
+                if let existingUser = existingUser {
+                    throw Abort(.badRequest, reason: "Registration for '\(existingUser.email)' already exists")
                 }
                 let privateUser = User(fullName: userInput.fullName,
                                        designation: userInput.designation,

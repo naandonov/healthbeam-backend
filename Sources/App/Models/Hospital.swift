@@ -14,17 +14,20 @@ final class Hospital: Content {
     struct Public: Content {
         var id: Int?
         var name: String
+        var type: String
     }
     
     var id: Int?
     var name: String
+    var type: String
     
-    init(name: String) {
+    init(name: String, type: String) {
         self.name = name
+        self.type = type
     }
     
     func mapToPublic() throws -> Public {
-        return try Public(id: requireID(), name: name)
+        return try Public(id: requireID(), name: name, type:type)
     }
 
 }
