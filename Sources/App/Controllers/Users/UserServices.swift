@@ -78,7 +78,7 @@ class UserServices {
         }
     }
     
-    class func saveDeviceToken(_ request: Request) throws -> Future<HTTPStatus> {
+    class func saveDeviceToken(_ request: Request) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
         return try request.content.decode(Device.Request.self).flatMap{ deviceRequest in
             return try user.userDevice.query(on: request)
@@ -86,11 +86,11 @@ class UserServices {
                 .flatMap { device in
                     if let device = device {
                         device.deviceToken = deviceRequest.deviceToken
-                        return device.update(on: request).transform(to: .ok)
+                        return device.update(on: request).transform(to: FormattedResultWrapper(result: .success))
                     }
                     let model = deviceRequest.model()
                     try model.userId = user.requireID()
-                    return model.save(on: request).transform(to: .ok)
+                    return model.save(on: request).transform(to: FormattedResultWrapper(result: .success))
             }
         }
     }
