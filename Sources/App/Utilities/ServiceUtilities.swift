@@ -20,9 +20,11 @@ struct QueryCount: Content {
 }
 
 enum BatchQueryConfiguration {
+    typealias InnerJoinStatement = (table: String, connectionKey: String, tableKey: String)
     case searchQuery(keyName: String)
     case sort(keyName: String, isAscending: Bool)
     case filter(keyValuePairs: [String: String])
+    case innerJoin(statements: [InnerJoinStatement])
 }
 
 enum CRUDOperationSelector {
@@ -97,7 +99,7 @@ class ServiceUtilities {
             let user = try request.requireAuthenticated(User.self)
             
             let tableName = String(describing: T.self)
-            var searchQuery = " FROM \"\(tableName)\""
+            var searchQuery = " FROM \(tableName.psqlFormatted)"
             var sortQuery = ""
             
             var queryConfigurations: [BatchQueryConfiguration] = []
@@ -107,10 +109,13 @@ class ServiceUtilities {
             
             for configuration in queryConfigurations {
                 switch configuration {
-                    
+                case let .innerJoin(statements):
+                    for statement in statements {
+                        searchQuery += " INNER JOIN \(statement.table.psqlFormatted) ON \(statement.connectionKey.psqlFormatted)=\(statement.tableKey.psqlFormatted)"
+                    }
                 case let .searchQuery(keyName):
                     if let searchParameter = request.query[String.self, at: "search"] {
-                        searchQuery += " WHERE LOWER(\"\(keyName)\") LIKE LOWER('%\(searchParameter)%')"
+                        searchQuery += " WHERE LOWER(\(keyName.psqlFormatted)) LIKE LOWER('%\(searchParameter)%')"
                     }
                 case .filter(let keyValuePairs):
                     var appendStatement: String
@@ -121,15 +126,15 @@ class ServiceUtilities {
                         appendStatement = " WHERE"
                     }
                     for (key, value) in keyValuePairs {
-                        searchQuery += "\(appendStatement) \"\(key)\" = '\(value)'"
+                        searchQuery += "\(appendStatement) \(key.psqlFormatted) = '\(value)'"
                         appendStatement = "AND"
                     }
                 case let .sort(keyName, isAscending):
-                    sortQuery = " GROUP BY id ORDER BY \"\(keyName)\" \(isAscending ? "ASC" : "DESC")"
+                    sortQuery = " ORDER BY \(keyName.psqlFormatted) \(isAscending ? "ASC" : "DESC")"
                 }
             }
             
-            let countQuery = "SELECT COUNT(id)" + searchQuery
+            let countQuery = "SELECT COUNT(\(tableName.psqlFormatted).id)" + searchQuery
             var resultsQuery = "SELECT *" + searchQuery + sortQuery
             
             return request.withNewConnection(to: .psql) { connection in
@@ -206,5 +211,11 @@ class ServiceUtilities {
             return .ok
         }
         
+    }
+}
+
+private extension String {
+    var psqlFormatted: String {
+        return self.split(separator: ".").map() { "\"\($0)\"" }.joined(separator: ".")
     }
 }
