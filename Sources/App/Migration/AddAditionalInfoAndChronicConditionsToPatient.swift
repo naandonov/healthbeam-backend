@@ -12,9 +12,9 @@ struct AddAditionalInfoAndChronicConditionsToPatient: Migration {
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
         return Database.update(Patient.self, on: conn, closure: { builder in
             builder.field(for: \.aditionalInfo)
-            builder.field(for: \.chronicConditions)
-//            let defaultValueConstraint =  PostgreSQLColumnConstraint.default(.literal(0))
-//            builder.field(for: \.chronicConditions, type: .text, defaultValueConstraint)
+            
+            let defaultValueConstraint =  PostgreSQLColumnConstraint.default(.literal("{}"))
+            builder.field(for: \.chronicConditions, type: .array(.text), defaultValueConstraint)
         })
     }
     
