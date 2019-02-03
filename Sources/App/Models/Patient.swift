@@ -26,7 +26,7 @@ final class Patient: Content {
         var chronicConditions: [String]
 
         var premiseLocation: String?
-        var aditionalInfo: String?
+        var notes: String?
 //        var patientTag: PatientTag.Public?
 //        var healthRecords: [HealthRecord.Public]?
         
@@ -40,7 +40,7 @@ final class Patient: Content {
                            alergies: alergies,
                            chronicConditions: chronicConditions,
                            premiseLocation: premiseLocation,
-                           aditionalInfo: aditionalInfo,
+                           notes: notes,
                            premiseId: premiseId)
         }
     }
@@ -55,14 +55,14 @@ final class Patient: Content {
     var alergies: [String]
     var chronicConditions: [String]
     var premiseLocation: String?
-    var aditionalInfo: String?
+    var notes: String?
     
     var patientTagId: PatientTag.ID?
     
     var premiseId: Premise.ID
     
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], chronicConditions: [String], premiseLocation: String?, aditionalInfo: String?, premiseId: Premise.ID) {
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], chronicConditions: [String], premiseLocation: String?, notes: String?, premiseId: Premise.ID) {
         
         self.fullName = fullName
         self.gender = gender
@@ -72,7 +72,7 @@ final class Patient: Content {
         self.alergies = alergies
         self.chronicConditions = chronicConditions
         self.premiseLocation = premiseLocation
-        self.aditionalInfo = aditionalInfo
+        self.notes = notes
         self.premiseId = premiseId
     }
     
@@ -100,7 +100,7 @@ extension Patient: PublicMapper {
                                   alergies: alergies,
                                   chronicConditions: chronicConditions,
                                   premiseLocation: premiseLocation,
-                                  aditionalInfo: aditionalInfo)
+                                  notes: notes)
     }
 }
 

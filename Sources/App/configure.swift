@@ -63,7 +63,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Gateway.self, database: .psql)
     migrations.add(model: Premise.self, database: .psql)
     
-//    migrations.add(migration: AddAditionalInfoAndChronicConditionsToPatient.self, database: .psql)
+//    migrations.add(migration: NotesAndChronicConditionsToPatient, database: .psql)
 //    migrations.add(migration: AddGatewayTable.self, database: .psql)
     services.register(migrations)
     
