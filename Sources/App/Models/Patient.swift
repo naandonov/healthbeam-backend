@@ -23,7 +23,10 @@ final class Patient: Content {
         var birthDate: Date
         var bloodType: String
         var alergies: [String]
-        var premiseLocation: String
+        var chronicConditions: [String]
+
+        var premiseLocation: String?
+        var aditionalInfo: String?
 //        var patientTag: PatientTag.Public?
 //        var healthRecords: [HealthRecord.Public]?
         
@@ -35,7 +38,9 @@ final class Patient: Content {
                            birthDate: birthDate,
                            bloodType: bloodType,
                            alergies: alergies,
+                           chronicConditions: chronicConditions,
                            premiseLocation: premiseLocation,
+                           aditionalInfo: aditionalInfo,
                            premiseId: premiseId)
         }
     }
@@ -48,14 +53,16 @@ final class Patient: Content {
     var birthDate: Date
     var bloodType: String
     var alergies: [String]
-    var premiseLocation: String
+    var chronicConditions: [String]
+    var premiseLocation: String?
+    var aditionalInfo: String?
     
     var patientTagId: PatientTag.ID?
     
     var premiseId: Premise.ID
     
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String, premiseId: Premise.ID) {
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], chronicConditions: [String], premiseLocation: String?, aditionalInfo: String?, premiseId: Premise.ID) {
         
         self.fullName = fullName
         self.gender = gender
@@ -63,7 +70,9 @@ final class Patient: Content {
         self.birthDate = birthDate
         self.bloodType = bloodType
         self.alergies = alergies
+        self.chronicConditions = chronicConditions
         self.premiseLocation = premiseLocation
+        self.aditionalInfo = aditionalInfo
         self.premiseId = premiseId
     }
     
@@ -89,7 +98,9 @@ extension Patient: PublicMapper {
                                   birthDate: birthDate,
                                   bloodType: bloodType,
                                   alergies: alergies,
-                                  premiseLocation: premiseLocation)
+                                  chronicConditions: chronicConditions,
+                                  premiseLocation: premiseLocation,
+                                  aditionalInfo: aditionalInfo)
     }
 }
 

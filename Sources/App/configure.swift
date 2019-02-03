@@ -46,6 +46,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     databases.add(database: postgresqlDatabase, as: .psql)
     services.register(databases)
     
+    var commands = CommandConfig.default()
+    commands.useFluentCommands()
+    services.register(commands)
     
     /// Configure migrations
     var migrations = MigrationConfig()
@@ -57,7 +60,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: PatientTag.self, database: .psql)
     migrations.add(model: PatientAlert.self, database: .psql)
     migrations.add(model: Device.self, database: .psql)
-     migrations.add(model: Premise.self, database: .psql)
+    migrations.add(model: Gateway.self, database: .psql)
+    migrations.add(model: Premise.self, database: .psql)
+    
+    migrations.add(migration: AddAditionalInfoAndChronicConditionsToPatient.self, database: .psql)
+    migrations.add(migration: AddGatewayTable.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)
