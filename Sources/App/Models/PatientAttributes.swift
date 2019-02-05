@@ -10,6 +10,7 @@ import Vapor
 
 struct PatientAttributes: Content {
     
+    let observers: [User.ExternalPublic]
     let healthRecords: [HealthRecord.Public]
     let patientTag: PatientTag.Public?
 }

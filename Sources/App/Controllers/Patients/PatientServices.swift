@@ -103,13 +103,18 @@ class PatientServices {
                         try patient
                             .patientTag
                             .query(on: request)
-                            .first()
-                            .map { patientTag -> ResultWrapper<PatientAttributes> in
-                                let patientAttributes = PatientAttributes(healthRecords: try healthRecords.map() { try $0.mapToPublic() },
-                                                                              patientTag: try patientTag.map() { try $0.mapToPublic()} )
-                                return patientAttributes.parse()
+                            .first().flatMap { patientTag in
+                                try patient
+                                    .observers
+                                    .query(on: request)
+                                    .all()
+                                    .map { observers -> ResultWrapper<PatientAttributes> in
+                                        let patientAttributes = PatientAttributes(observers: try observers.map { try $0.mapToExternalPublic() },
+                                                                                  healthRecords: try healthRecords.map { try $0.mapToPublic() },
+                                                                                  patientTag: try patientTag.map { try $0.mapToPublic()} )
+                                        return patientAttributes.parse()
+                                }
                         }
-                        
                 }
         }
     }

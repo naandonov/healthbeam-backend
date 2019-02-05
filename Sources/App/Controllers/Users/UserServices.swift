@@ -66,6 +66,8 @@ class UserServices {
         }
     }
     
+    
+    
     class func getPatientSubscriptions(_ request: Request) throws -> Future<ArrayResultWrapper<Patient>> {
         let user = try request.requireAuthenticated(User.self)
         return try user
