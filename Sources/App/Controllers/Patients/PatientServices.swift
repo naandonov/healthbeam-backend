@@ -105,7 +105,8 @@ class PatientServices {
                             .query(on: request)
                             .first()
                             .map { patientTag -> ResultWrapper<PatientAttributes> in
-                                let patientAttributes = PatientAttributes(healthRecords: healthRecords, patientTag: patientTag)
+                                let patientAttributes = PatientAttributes(healthRecords: try healthRecords.map() { try $0.mapToPublic() },
+                                                                              patientTag: try patientTag.map() { try $0.mapToPublic()} )
                                 return patientAttributes.parse()
                         }
                         
