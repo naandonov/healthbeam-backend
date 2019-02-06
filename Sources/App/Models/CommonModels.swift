@@ -13,11 +13,21 @@ struct ResultWrapper<T: Content>: Content {
 }
 
 struct FormattedResultWrapper: Content {
+    
+    struct ResponseObject: Content {
+        let status: String
+    }
+    
     enum Result: String, Content {
         case success = "success"
         case faliure = "faliure"
     }
-    let result: Result?
+    
+    let result: ResponseObject?
+    
+    init(_ result: Result) {
+        self.result = ResponseObject(status: result.rawValue)
+    }
 }
 
 struct ArrayResultWrapper<T: Content>: Content {
