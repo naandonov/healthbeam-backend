@@ -64,7 +64,7 @@ class PatientServices {
     }
     
     
-    class func deletePatient(_ request: Request) throws -> Future<HTTPStatus> {
+    class func deletePatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self)
             .flatMap({ patient  in
@@ -84,7 +84,7 @@ class PatientServices {
                                 throw error
                             })
                         
-                    }.transform(to: .ok)
+                    }.transform(to: FormattedResultWrapper(result: .success))
             })
     }
     
