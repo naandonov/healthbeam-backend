@@ -11,13 +11,13 @@ import FluentPostgreSQL
 
 class PatientServices {
     
-    class func cretePatient(_ request: Request, patientRequest: Patient.Public) throws -> Future<Patient.Public> {
+    class func cretePatient(_ request: Request, patientRequest: Patient.Public) throws -> Future<ResultWrapper<Patient.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return Patient
             .query(on: request)
             .filter(\Patient.personalIdentification == patientRequest.personalIdentification)
             .first()
-            .flatMap { patient -> Future<Patient.Public> in
+            .flatMap { patient in
                 if let _ = patient {
                     throw Abort(.badRequest, reason: "Patient with the provided personal identification already exists.")
                 }
@@ -25,12 +25,12 @@ class PatientServices {
                 return privatePatient
                     .save(on: request)
                     .map{ privateModel in
-                        return try privateModel.mapToPublic()
+                        return try privateModel.mapToPublic().parse()
                 }
         }
     }
     
-    class func updatePatient(_ request: Request, patientRequest: Patient.Public) throws -> Future<HTTPStatus> {
+    class func updatePatient(_ request: Request, patientRequest: Patient.Public) throws -> Future<ResultWrapper<Patient.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return accessiblePatients(on: request, for: user)
             .filter(\.id == patientRequest.id)
@@ -40,7 +40,9 @@ class PatientServices {
                 patient.updateFromPublic(patientRequest)
                 return patient
                     .update(on: request)
-                    .transform(to: .ok)
+                    .map({ patient in
+                        return try patient.mapToPublic().parse()
+                    })
         }
     }
     
