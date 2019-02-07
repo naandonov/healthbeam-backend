@@ -25,7 +25,7 @@ struct FormattedResultWrapper: Content {
     
     let result: ResponseObject?
     
-    init(_ result: Result) {
+    init(result: Result) {
         self.result = ResponseObject(status: result.rawValue)
     }
 }
