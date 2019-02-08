@@ -37,12 +37,13 @@ final class PatientAlert: Content {
         var respondDate: String?
         var status: String
         var notes: String?
+        var gateway: Gateway.Public
         
         var patient: Patient.Public
         var responder: User.ExternalPublic?
         
         
-        init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil) throws {
+        init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil, gateway: Gateway, premise: Premise) throws {
             id = try patientAlert.requireID()
             creationDate = patientAlert.creationDate.extendedDateString()
             if let respondDate = patientAlert.respondDate {
@@ -54,6 +55,8 @@ final class PatientAlert: Content {
             if let responder = responder {
                 self.responder = try responder.mapToExternalPublic()
             }
+
+            self.gateway = try gateway.mapToPublic(forPremise: premise.mapToPublic())
         }
     }
     
@@ -70,12 +73,22 @@ final class PatientAlert: Content {
     
     var patientId: Patient.ID?
     var responderId: User.ID?
+    var gatewayId: Gateway.ID
     
-    init(creationDate: Date, alertStatus: AlertStatus) {
+    
+    init(creationDate: Date, alertStatus: AlertStatus, gatewayId: Gateway.ID) {
         self.creationDate = creationDate
         self.status = alertStatus.rawValue
+        self.gatewayId = gatewayId
     }
     
+}
+
+extension PatientAlert {
+
+    var premise: Parent<PatientAlert, Gateway> {
+        return parent(\.gatewayId)
+    }
 }
 
 extension PatientAlert: Migration {

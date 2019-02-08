@@ -16,8 +16,8 @@ class ClientAlertsController: RouteCollection {
         alertRouter.post(PatientAlert.Encoded.self, at: "generate", use: AlertServices.createAlert)
         alertRouter.post(Patient.Subscribtion.self, at: "respond", use: AlertServices.respondToAlert)
         alertRouter.get("pending", use: AlertServices.getPendingAlerts)
-        alertRouter.get("records", use: AlertServices.getAlertRecords)
-        
+        alertRouter.get("responded", use: AlertServices.getUserRespondedAlertRecords)
+        alertRouter.get("records", use: AlertServices.getAllCompletedAlertRecords)
     }
     
 }

@@ -22,10 +22,13 @@ class PatientServices {
                     throw Abort(.badRequest, reason: "Patient with the provided personal identification already exists.")
                 }
                 let privatePatient = patientRequest.creationModel(premiseId: user.premiseId)
+
                 return privatePatient
                     .save(on: request)
-                    .map{ privateModel in
-                        return try privateModel.mapToPublic().parse()
+                    .flatMap{ privateModel in
+                        user.patientSubscriptions.attach(privatePatient, on: request).map({ _ in
+                            return try privateModel.mapToPublic().parse()
+                        })
                 }
         }
     }

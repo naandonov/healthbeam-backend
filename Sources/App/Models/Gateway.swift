@@ -11,17 +11,19 @@ import FluentPostgreSQL
 
 struct Gateway: Content {
     
-    struct Public {
+    struct Public: Content {
         let id: Int
         var codeIdentifier: String
+        var name: String
         let premise: Premise.Public
     }
     var id: Int?
     var codeIdentifier: String
+    var name: String
     var premiseId: Premise.ID
     
     func mapToPublic(forPremise premise: Premise.Public) throws -> Gateway.Public {
-        return try Public(id: requireID(), codeIdentifier: codeIdentifier, premise: premise)
+        return try Public(id: requireID(), codeIdentifier: codeIdentifier, name: name, premise: premise)
     }
 
 }
