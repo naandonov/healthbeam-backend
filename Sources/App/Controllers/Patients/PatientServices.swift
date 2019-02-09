@@ -102,7 +102,7 @@ class PatientServices {
                 return try patient
                     .healthRecords
                     .query(on: request)
-                    .join(\HealthRecord.userId, to: \User.id)
+                    .join(\User.id, to: \HealthRecord.userId)
                     .alsoDecode(User.self)
                     .all()
                     .flatMap { healthRecordsTable in
