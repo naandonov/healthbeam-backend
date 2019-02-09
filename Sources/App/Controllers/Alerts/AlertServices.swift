@@ -90,7 +90,7 @@ class AlertServices {
                                                         .first()
                                                         .flatMap{ device -> Future<Void> in
                                                             if let device = device {
-                                                                let payload = APNSPayload.init(title: "Patient Alert", body: "\(patient.fullName) needs immediate assistance")
+                                                                let payload = APNSPayload.init(title: "Patient Alert", body: "\(patient.fullName) needs immediate assistance from \(gateway.name)")
                                                                 return try ServiceUtilities.pushToDeviceToken(device.deviceToken, payload, request).transform(to: ())
                                                             }
                                                             return Future.map(on: request) { }

@@ -11,6 +11,7 @@ import Vapor
 enum WebConstants {
     static let HomeDirectory = "home"
     static let CreateAccountDirectory = "create-account"
+    static let CreateGatewayDirectory = "create-gateway"
     static let AlertRecordsDirectory = "alert-records"
     static let PatientsListDirectory = "patients-list"
     static let LoginDirectory = "/"
@@ -50,5 +51,8 @@ class WebRootController: RouteCollection {
         
         let webPatientsController = WebPatientsController()
         try protectedRouter.register(collection: webPatientsController)
+        
+        let webGatewayController = WebGatewayController()
+        try protectedRouter.register(collection: webGatewayController)
     }
 }

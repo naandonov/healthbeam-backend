@@ -32,6 +32,21 @@
                             <h3 class="name">Alert Records</h3>
                             <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="alert-records" class="learn-more">Go to page »</a></div>
                     </div>
+                    <div class="col-sm-6 col-md-5 col-lg-4 item">
+                        <div class="box"><i class="fa fa-align-center icon" style="color:rgb(114,203,210);"></i>
+                            <h3 class="name">Gateway</h3>
+                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="create-gateway" class="learn-more">go to page »</a></div>
+                    </div>
+                    <div class="col-sm-6 col-md-5 col-lg-4 item">
+                        <div class="box"><i class="fa fa-list-alt icon" style="color:rgb(114,203,210);"></i>
+                            <h3 class="name">Customizable</h3>
+                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="#" class="learn-more">go to page »</a></div>
+                    </div>
+                    <div class="col-sm-6 col-md-5 col-lg-4 item">
+                        <div class="box"><i class="fa fa-list-alt icon" style="color:rgb(114,203,210);"></i>
+                            <h3 class="name">Customizable</h3>
+                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="#" class="learn-more">go to page »</a></div>
+                    </div>
                 </div>
             </div>
         </div>

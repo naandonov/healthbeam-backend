@@ -17,6 +17,12 @@ struct Gateway: Content {
         var name: String
         let premise: Premise.Public
     }
+    
+    struct Registration: Content {
+        var codeIdentifier: String
+        var name: String
+    }
+    
     var id: Int?
     var codeIdentifier: String
     var name: String

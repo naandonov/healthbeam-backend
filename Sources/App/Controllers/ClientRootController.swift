@@ -36,5 +36,8 @@ class ClientRootController: RouteCollection {
         
         let clientAlertsController = ClientAlertsController()
         try rootRouter.register(collection: clientAlertsController)
+        
+        let clientGatewayController = ClientGatewayController()
+        try rootRouter.register(collection: clientGatewayController)
     }
 }
