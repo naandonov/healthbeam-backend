@@ -42,37 +42,53 @@ class HealthRecordServices {
         }
     }
     
-    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Public)throws -> Future<HTTPStatus> {
+    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Public)throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
-        return try request.parameters.next(Patient.self).flatMap { patient in
-            try PatientServices.validateInteraction(for: user, with: patient)
-            
-            guard let healthRecordId = recordRequest.id else {
-                throw Abort(.badRequest, reason: "Missing Health Record Id")
-            }
-            let notFound = try Abort(.notFound, reason: "No record with ID '\(healthRecordId)' found for patient '\(patient.requireID())'")
-            
-            return try patient.healthRecords.query(on: request).filter(\.id == healthRecordId).first().unwrap(or: notFound).flatMap({ record  in
-                record.updateFromPublic(recordRequest)
-                return record
-                    .update(on: request)
-                    .transform(to: .ok)
-            })
+        guard let healthRecordId = recordRequest.id else {
+            throw Abort(.badRequest, reason: "Missing Health Record Id")
+        }
+        
+        return  HealthRecord
+            .query(on: request)
+            .filter(\.id == healthRecordId).first().unwrap(or: Abort(.notFound, reason: "Health Record Doesn't Exists"))
+            .flatMap { healthRecord in
+                return Patient
+                    .query(on: request)
+                    .filter(\Patient.id == healthRecord.patientId)
+                    .first().unwrap(or: Abort(.notFound, reason: "Health Record Doesn't Have An Owner"))
+                    .flatMap { patient in
+                        try PatientServices.validateInteraction(for: user, with: patient)
+                         healthRecord.updateFromPublic(recordRequest)
+                        return healthRecord
+                            .update(on: request)
+                            .map { _ in
+                                return FormattedResultWrapper(result: .success)
+                        }
+                }
         }
     }
     
-    class func deleteRecord(request: Request) throws -> Future<HTTPStatus> {
+    class func deleteRecord(request: Request) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
-        return try request.parameters.next(Patient.self).flatMap { patient in
-            try PatientServices.validateInteraction(for: user, with: patient)
-            
-            let healthRecordId = try request.parameters.next(HealthRecord.ID.self)
-            return try patient.healthRecords
-                .query(on: request)
-                .filter(\.id == healthRecordId).first().unwrap(or: Abort(.notFound, reason: "Health Record Doesn't Exists"))
-                .delete(on: request)
-                .transform(to: .noContent)
+        let healthRecordId = try request.parameters.next(HealthRecord.ID.self)
+        
+        
+        return  HealthRecord
+            .query(on: request)
+            .filter(\.id == healthRecordId).first().unwrap(or: Abort(.notFound, reason: "Health Record Doesn't Exists"))
+            .flatMap { healthRecord in
+                return Patient
+                    .query(on: request)
+                    .filter(\Patient.id == healthRecord.patientId)
+                    .first().unwrap(or: Abort(.notFound, reason: "Health Record Doesn't Have An Owner"))
+                    .flatMap { patient in
+                        try PatientServices.validateInteraction(for: user, with: patient)
+                        return healthRecord
+                            .delete(on: request)
+                            .map { _ in
+                                return FormattedResultWrapper(result: .success)
+                        }
+                }
         }
     }
-    
 }
