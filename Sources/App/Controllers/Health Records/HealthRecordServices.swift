@@ -42,7 +42,7 @@ class HealthRecordServices {
         }
     }
     
-    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Public)throws -> Future<FormattedResultWrapper> {
+    class func updateHealthRecord(request: Request, recordRequest: HealthRecord.Public)throws -> Future<ResultWrapper<HealthRecord.Public>> {
         let user = try request.requireAuthenticated(User.self)
         guard let healthRecordId = recordRequest.id else {
             throw Abort(.badRequest, reason: "Missing Health Record Id")
@@ -61,8 +61,8 @@ class HealthRecordServices {
                          healthRecord.updateFromPublic(recordRequest)
                         return healthRecord
                             .update(on: request)
-                            .map { _ in
-                                return FormattedResultWrapper(result: .success)
+                            .map { record in
+                                return try record.mapToPublic().parse()
                         }
                 }
         }
