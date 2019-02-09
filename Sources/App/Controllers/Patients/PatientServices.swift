@@ -102,8 +102,10 @@ class PatientServices {
                 return try patient
                     .healthRecords
                     .query(on: request)
+                    .join(\HealthRecord.userId, to: \User.id)
+                    .alsoDecode(User.self)
                     .all()
-                    .flatMap { healthRecords in
+                    .flatMap { healthRecordsTable in
                         
                         try patient
                             .patientTag
@@ -115,7 +117,7 @@ class PatientServices {
                                     .all()
                                     .map { observers -> ResultWrapper<PatientAttributes> in
                                         let patientAttributes = PatientAttributes(observers: try observers.map { try $0.mapToExternalPublic() },
-                                                                                  healthRecords: try healthRecords.map { try $0.mapToPublic() },
+                                                                                  healthRecords: try healthRecordsTable.map { try $0.0.mapToPublic(creator: $0.1) },
                                                                                   patientTag: try patientTag.map { try $0.mapToPublic()} )
                                         return patientAttributes.parse()
                                 }
