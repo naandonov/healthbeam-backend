@@ -12,7 +12,7 @@ import FluentPostgreSQL
 class PatientTagServices {
     
     
-    class func assignPatientTag(request: Request, patientTag: PatientTag) throws -> Future<PatientTag> {
+    class func assignPatientTag(request: Request, patientTag: PatientTag) throws -> Future<ResultWrapper<PatientTag.Public>> {
         let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
             try PatientServices.validateInteraction(for: user, with: patient)
@@ -25,21 +25,22 @@ class PatientTagServices {
                 .flatMap({ existingPatientTag in
                     if let existingPatientTag = existingPatientTag {
                         existingPatientTag.patientId = patient.id
-                        return existingPatientTag.update(on: request)
-                    }
-                    else {
-                        return try patient.patientTag.query(on: request).first().flatMap({ tag -> Future<PatientTag> in
+                        return existingPatientTag.update(on: request).map({ tag in
+                            try tag.mapToPublic().parse()
+                        })
+                    } else {
+                        return try patient.patientTag.query(on: request).first().flatMap({ tag ->  Future<ResultWrapper<PatientTag.Public>> in
                             if let unwrappedTag = tag {
                                 unwrappedTag.minor = patientTag.minor
                                 unwrappedTag.major = patientTag.major
-                                return unwrappedTag.update(on: request)
+                                return unwrappedTag.update(on: request).map({ tag in
+                                    try tag.mapToPublic().parse()
+                                })
                             }
                             patientTag.patientId = patient.id
-                            return patientTag.save(on: request).flatMap({ _ in
+                            return patientTag.save(on: request).flatMap({ tag in
                                 patient.patientTagId = patientTag.id
-                                return patient.update(on: request).map({ _ -> PatientTag in
-                                    patientTag
-                                })
+                                return patient.update(on: request).transform(to: try tag.mapToPublic().parse())
                             })
                         })
                     }
@@ -47,11 +48,11 @@ class PatientTagServices {
         }
     }
     
-    class func unassignPatientTag(request: Request) throws -> Future<HTTPStatus> {
+    class func unassignPatientTag(request: Request) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
             try PatientServices.validateInteraction(for: user, with: patient)
-            return try unassignPatientTag(for: patient, on: request)
+            return try unassignPatientTag(for: patient, on: request).transform(to: FormattedResultWrapper(result: .success))
         }
     }
     

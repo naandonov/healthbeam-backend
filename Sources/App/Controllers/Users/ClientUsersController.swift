@@ -16,6 +16,7 @@ class ClientUsersController: RouteCollection {
         userRouter.get("/", use: UserServices.getUserInfo)
         userRouter.post("subscribe", use: UserServices.subscribeToPatient)
         userRouter.post("unsubscribe", use: UserServices.unsubscribeToPatient)
+        userRouter.post("toggleSubscription", use: UserServices.subscribeToggleForPatient)
 //        userRouter.get("subscriptions", use: UserServices.getPatientSubscriptions)
         let subscriptionsRouter = userRouter.grouped("subscriptions")
         ServiceUtilities.generateBatchOperation(router: subscriptionsRouter, type: Patient.self) { user in

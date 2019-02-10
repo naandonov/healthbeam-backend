@@ -25,44 +25,69 @@ class UserServices {
         }
     }
     
-    class func subscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
+    class func subscribeToggleForPatient(_ request: Request) throws -> Future<ResultWrapper<Patient.SubscriptionToggleResult>> {
         return try request.content.decode(Patient.Subscribtion.self).flatMap { subscriptionRequest in
-            let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
             let user = try request.requireAuthenticated(User.self)
-            return Patient
+            return try user.patientSubscriptions
                 .query(on: request)
                 .filter(\Patient.id, .equal, subscriptionRequest.patientId)
                 .first()
-                .unwrap(or: notFound).flatMap{ patient in
-                    try PatientServices.validateInteraction(for: user, with: patient)
-                    return try user.patientSubscriptions.query(on: request)
-                        .filter(\.id == patient.requireID())
-                        .first()
-                        .flatMap({ existingSubscriber in
-                            if let _ = existingSubscriber {
-                                return Future.map(on: request, {
-                                    return FormattedResultWrapper(result: .success)
-                                })
-                            }
-                            return user.patientSubscriptions.attach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
-                        })
-            }
+                .flatMap({ patient in
+                    if let patient = patient {
+                        return try unsubscribeToPatient(patient.requireID(), user: user, request: request).transform(to: Patient.SubscriptionToggleResult(isSubscribed: false, patientId: patient.requireID()).parse())
+                    } else {
+                        return try subscribeToPatient(subscriptionRequest.patientId, user: user, request: request).transform(to: Patient.SubscriptionToggleResult(isSubscribed: true, patientId: subscriptionRequest.patientId).parse())
+                    }
+                })
+        }
+    }
+    
+    class func subscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
+        return try request.content.decode(Patient.Subscribtion.self).flatMap { subscriptionRequest in
+            let user = try request.requireAuthenticated(User.self)
+            return try subscribeToPatient(subscriptionRequest.patientId, user: user, request: request)
+        }
+    }
+    
+    class private func subscribeToPatient(_ patientId: Patient.ID, user: User, request: Request) throws -> Future<FormattedResultWrapper> {
+        let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
+        return Patient
+            .query(on: request)
+            .filter(\Patient.id, .equal, patientId)
+            .first()
+            .unwrap(or: notFound)
+            .flatMap{ patient in
+                try PatientServices.validateInteraction(for: user, with: patient)
+                return try user.patientSubscriptions.query(on: request)
+                    .filter(\.id == patient.requireID())
+                    .first()
+                    .flatMap({ existingSubscriber in
+                        if let _ = existingSubscriber {
+                            return Future.map(on: request, {
+                                return FormattedResultWrapper(result: .success)
+                            })
+                        }
+                        return user.patientSubscriptions.attach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
+                    })
+        }
+    }
+    
+    class private func unsubscribeToPatient(_ patientId: Patient.ID, user: User, request: Request) throws -> Future<FormattedResultWrapper> {
+        let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
+        return try user.patientSubscriptions
+            .query(on: request)
+            .filter(\Patient.id, .equal, patientId)
+            .first()
+            .unwrap(or: notFound).flatMap{ patient in
+                try PatientServices.validateInteraction(for: user, with: patient)
+                return user.patientSubscriptions.detach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
         }
     }
     
     class func unsubscribeToPatient(_ request: Request) throws -> Future<FormattedResultWrapper> {
         return try request.content.decode(Patient.Subscribtion.self).flatMap { subscriptionRequest in
-            let notFound = Abort(.notFound, reason: "The Provided Patient ID is Invalid")
             let user = try request.requireAuthenticated(User.self)
-            
-            return try user.patientSubscriptions
-                .query(on: request)
-                .filter(\Patient.id, .equal, subscriptionRequest.patientId)
-                .first()
-                .unwrap(or: notFound).flatMap{ patient in
-                    try PatientServices.validateInteraction(for: user, with: patient)
-                    return user.patientSubscriptions.detach(patient, on: request).transform(to: FormattedResultWrapper(result: .success))
-            }
+            return try unsubscribeToPatient(subscriptionRequest.patientId, user: user, request: request)
         }
     }
     

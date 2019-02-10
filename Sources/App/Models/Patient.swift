@@ -15,6 +15,11 @@ final class Patient: Content {
         var patientId: Int
     }
     
+    struct SubscriptionToggleResult: Content {
+        let isSubscribed: Bool
+        var patientId: Int
+    }
+    
     struct Public: Content {
         var id: Int?
         var fullName: String
