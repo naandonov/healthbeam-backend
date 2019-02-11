@@ -88,6 +88,7 @@ final class Patient: Content {
        birthDate = publicPatient.birthDate
        bloodType = publicPatient.bloodType
        alergies = publicPatient.alergies
+       notes = publicPatient.notes
        premiseLocation = publicPatient.premiseLocation
     }
 }
