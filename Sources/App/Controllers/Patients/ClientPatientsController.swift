@@ -24,6 +24,7 @@ class ClientPatientsController: RouteCollection {
 //        patientsRouter.get(use: PatientServices.getAllPatients)
         patientsRouter.post(Patient.Public.self, at: "/", use: PatientServices.cretePatient)
         patientsRouter.put(Patient.Public.self, at: "/", use: PatientServices.updatePatient)
+        patientsRouter.post("nearby", use: PatientServices.getNearbyPatientsForTags)
 //      patientsRouter.get("query", use: PatientServices.searchPatients)
     }
 }

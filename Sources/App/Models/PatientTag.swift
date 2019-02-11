@@ -12,7 +12,7 @@ import FluentPostgreSQL
 final class PatientTag: Content {
     
     struct Public: Content {
-        var id: Int
+        var id: Int?
         var minor: Int
         var major: Int
     }
