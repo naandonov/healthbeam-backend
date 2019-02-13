@@ -175,27 +175,22 @@ extension PatientServices {
             .filter(\.premiseId == user.premiseId)
     }
     
+    
     class func getNearbyPatientsForTags(request: Request) throws -> Future<ArrayResultWrapper<Patient.Public>> {
         let user = try request.requireAuthenticated(User.self)
-        
-        return try request.content.decode([PatientTag.Public].self).flatMap { nearbyTags in
-            return Patient
-                .query(on: request)
-                .join(\PatientTag.patientId, to: \Patient.id)
-                .alsoDecode(PatientTag.self)
-                .filter(\Patient.premiseId, .equal, user.premiseId)
-                .all().map({ result in
-                    
-                    //TODO: Refactor to use only queries for getting the correct results
-                    var patients: [Patient.Public] = []
-                    for (patient, tag) in result {
-                        if nearbyTags.contains(where: { $0.minor == tag.minor && $0.major == tag.major }) {
-                            try patients.append(patient.mapToPublic())
-                        }
-                    }
-                    
-                    return patients.parse()
-                })
+
+        return try request.content.decode([PatientTag.Public].self).flatMap { nearbyRequest in
+
+            let formattedArray = nearbyRequest.map({ "\($0.minor)-\($0.major)" })
+            let query = "SELECT * FROM " + "Patient".psqlFormatted + " INNER JOIN " + "PatientTag".psqlFormatted + " ON " + "Patient.id".psqlFormatted + " = " + "PatientTag.patientId".psqlFormatted + " WHERE CONCAT(" + "minor".psqlFormatted + ", '-', " + "major".psqlFormatted + ") = ANY(\(ServiceUtilities.stringArrayFormatted(formattedArray))) AND " + "premiseId".psqlFormatted + " = " + " '\(user.premiseId)'"
+            return request.withNewConnection(to: .psql) { connection in
+                return connection
+                    .raw(query)
+                    .all(decoding: Patient.self)
+                    .map() { patients in
+                        return try patients.map({ try $0.mapToPublic() }).parse()
+                }
+            }
         }
     }
 }

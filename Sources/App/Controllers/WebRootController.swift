@@ -14,6 +14,8 @@ enum WebConstants {
     static let CreateGatewayDirectory = "create-gateway"
     static let AlertRecordsDirectory = "alert-records"
     static let PatientsListDirectory = "patients-list"
+    static let TermsAndConditionsDirectory = "terms-and-conditions"
+    static let PrivacyPolicyDirectory = "privacy-policy"
     static let LoginDirectory = "/"
     static let UnauthorizedDirectory = "/"
     static let RootDirectory = "/"
@@ -54,5 +56,8 @@ class WebRootController: RouteCollection {
         
         let webGatewayController = WebGatewayController()
         try protectedRouter.register(collection: webGatewayController)
+        
+        let webGeneralController = WebGeneralController()
+        try router.authSessionRouter().register(collection: webGeneralController)
     }
 }

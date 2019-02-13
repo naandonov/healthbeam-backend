@@ -212,9 +212,21 @@ class ServiceUtilities {
         }
         
     }
+    
+    class func stringArrayFormatted(_ array: [String]) -> String {
+        var result = "ARRAY["
+        for (index, value) in array.enumerated() {
+            if index > 0 {
+                result += ", "
+            }
+            result += "'\(value)'"
+        }
+        result += "]::text[]"
+        return result
+    }
 }
 
-private extension String {
+extension String {
     var psqlFormatted: String {
         return self.split(separator: ".").map() { "\"\($0)\"" }.joined(separator: ".")
     }
