@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>HealthBeam Admin Portal</title>
+                <title>HealthBeam</title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
                         <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -19,7 +19,7 @@
                 <h2 class="sr-only">Login Form</h2>
                 <h2 class="text-center">Create Account</h2>
                 <div class="illustration"></div>
-                <div class="form-group"><input class="form-control" aria-describedby="inputGroupPrepend" value="#(premise.name)" disabled/></div>
+                <div class="form-group"><input class="form-control" aria-describedby="inputGroupPrepend" value="#(premise.name) #(premise.type)" disabled/></div>
                 <div class="form-group"><input name="fullName" placeholder="Full Name" minlength="2" required class="form-control" aria-describedby="inputGroupPrepend" required/></div>
                 <div class="form-group"><input name="designation" required placeholder="Designation" minlength="2" class="form-control" aria-describedby="inputGroupPrepend" required/></div>
                 <div class="form-group"><input class="form-control" type="email" name="email" required="" placeholder="Email" minlength="2" inputmode="email" aria-describedby="inputGroupPrepend" required></div>
@@ -73,7 +73,7 @@
                                       });
                     </script>
                 
-                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color:rgb(116,203,210);">Create</button></div>
+                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color:rgb(111,199,236);">Create</button></div>
             </form>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

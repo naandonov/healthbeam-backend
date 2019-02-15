@@ -97,7 +97,7 @@ class AuthenticationServices {
             .first()
             .unwrap(or: Abort(.badRequest, reason: "Missing required data"))
             .flatMap { premise in
-                let context = try ["hospital": premise.mapToPublic()]
+                let context = try ["premise": premise.mapToPublic()]
                 return try request.view().render("create-account", context)
         }
     }

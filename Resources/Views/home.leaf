@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>HealthBeam Admin Portal2</title>
+                <title>HealthBeam</title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
                         <link rel="stylesheet" href="assets/css/styles.min.css">
@@ -18,34 +18,34 @@
                 <div class="intro"></div>
                 <div class="row justify-content-center features">
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-user-md icon" style="color:rgb(116,203,210);"></i>
+                        <div class="box"><i class="fa fa-user-md icon" style="color:rgb(111,199,236);"></i>
                             <h3 class="name">Create User</h3>
-                          <p class="description">Create and customize mediacl professionals and staff and assigned them with patients' discovery regions.</p><a href="create-account" class="learn-more">Go to page »</a></div>
+                          <p class="description">Create HealthBeam accounts and assign patients' discovery regions</p><a href="create-account" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-users icon" style="color:rgb(104,201,208);"></i>
+                        <div class="box"><i class="fa fa-users icon" style="color:rgb(111,199,236);"></i>
                             <h3 class="name">Patients</h3>
-                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="patients-list" class="learn-more">Go to page »</a></div>
+                            <p class="description">Search among lists of all patients registered to the premise.</p><a href="patients-list" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-warning icon" style="color:rgb(114,203,210);"></i>
+                        <div class="box"><i class="fa fa-warning icon" style="color:rgb(111,199,236);"></i>
                             <h3 class="name">Alert Records</h3>
-                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="alert-records" class="learn-more">Go to page »</a></div>
+                            <p class="description">Explore all previous responses to patients in need of immediate medical attention</p><a href="patients-list" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-align-center icon" style="color:rgb(114,203,210);"></i>
+                        <div class="box"><i class="fa fa-align-center icon" style="color:rgb(111,199,236);"></i>
                             <h3 class="name">Gateway</h3>
-                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="create-gateway" class="learn-more">go to page »</a></div>
+                            <p class="description">Create gateway identification for monitoring patients' tag events.</p><a href="create-gateway" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-list-alt icon" style="color:rgb(114,203,210);"></i>
-                            <h3 class="name">Customizable</h3>
-                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="#" class="learn-more">go to page »</a></div>
+                        <div class="box"><i class="fa fa-file-text icon" style="color:rgb(111,199,236);"></i>
+                            <h3 class="name">Terms and Conditions</h3>
+                            <p class="description">Explore HealthBeam's terms and conditions regarding the provided service.</p><a href="terms-and-conditions" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
-                        <div class="box"><i class="fa fa-list-alt icon" style="color:rgb(114,203,210);"></i>
-                            <h3 class="name">Customizable</h3>
-                            <p class="description">Aenean tortor est, vulputate quis leo in, vehicula rhoncus lacus. Praesent aliquam in tellus eu.</p><a href="#" class="learn-more">go to page »</a></div>
+                        <div class="box"><i class="fa fa-list-alt icon" style="color:rgb(111,199,236);"></i>
+                            <h3 class="name">Privacy Policy</h3>
+                            <p class="description">Explore HealthBeam's privacy policy regarding the provided service.</p><a href="privacy-policy" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                 </div>
             </div>
