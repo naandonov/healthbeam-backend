@@ -184,10 +184,12 @@ class ServiceUtilities {
     }
     
     class func pushToDeviceToken(_ token: String, _ payload: APNSPayload, _ req: Request) throws -> Future<HTTPStatus> {
+        guard let certURL = FileManager.shared.pushCertificateURL() else {
+            throw Abort(.notFound, reason: "Missing Push Certificate URL")
+        }
         
         let shell = try req.make(Shell.self)
         
-        let certURL = FileManager.shared.pushCertificateURL()
         let apnsURL: String
         if Environment.IS_PRODUCTION_ENVIRONMENT {
             apnsURL = "https://api.push.apple.com/3/device/"

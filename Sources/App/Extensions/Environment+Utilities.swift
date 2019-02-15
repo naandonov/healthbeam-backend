@@ -17,6 +17,10 @@ extension Environment {
         return Environment.get("ENVIRONMENT") == "Production"
     }
     
+    static var IS_STAGING_ENVIRONMENT: Bool {
+        return Environment.get("ENVIRONMENT") == "Staging"
+    }
+    
     static var PUSH_CERTIFICATE_PWD: String {
         if IS_PRODUCTION_ENVIRONMENT {
             return Environment.get("PUSH_CERTIFICATE_PWD") ?? "password"
