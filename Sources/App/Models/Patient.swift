@@ -27,7 +27,7 @@ final class Patient: Content {
         var personalIdentification: String
         var birthDate: Date
         var bloodType: String
-        var alergies: [String]
+        var allergies: [String]
         var chronicConditions: [String]
 
         var premiseLocation: String?
@@ -42,7 +42,7 @@ final class Patient: Content {
                            personalIdentification: personalIdentification,
                            birthDate: birthDate,
                            bloodType: bloodType,
-                           alergies: alergies,
+                           allergies: allergies,
                            chronicConditions: chronicConditions,
                            premiseLocation: premiseLocation,
                            notes: notes,
@@ -57,7 +57,7 @@ final class Patient: Content {
     var personalIdentification: String
     var birthDate: Date
     var bloodType: String
-    var alergies: [String]
+    var allergies: [String]
     var chronicConditions: [String]
     var premiseLocation: String?
     var notes: String?
@@ -67,14 +67,14 @@ final class Patient: Content {
     var premiseId: Premise.ID
     
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], chronicConditions: [String], premiseLocation: String?, notes: String?, premiseId: Premise.ID) {
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, allergies: [String], chronicConditions: [String], premiseLocation: String?, notes: String?, premiseId: Premise.ID) {
         
         self.fullName = fullName
         self.gender = gender
         self.personalIdentification = personalIdentification
         self.birthDate = birthDate
         self.bloodType = bloodType
-        self.alergies = alergies
+        self.allergies = allergies
         self.chronicConditions = chronicConditions
         self.premiseLocation = premiseLocation
         self.notes = notes
@@ -87,7 +87,7 @@ final class Patient: Content {
        personalIdentification = publicPatient.personalIdentification
        birthDate = publicPatient.birthDate
        bloodType = publicPatient.bloodType
-       alergies = publicPatient.alergies
+       allergies = publicPatient.allergies
        notes = publicPatient.notes
        premiseLocation = publicPatient.premiseLocation
     }
@@ -103,7 +103,7 @@ extension Patient: PublicMapper {
                                   personalIdentification: personalIdentification,
                                   birthDate: birthDate,
                                   bloodType: bloodType,
-                                  alergies: alergies,
+                                  allergies: allergies,
                                   chronicConditions: chronicConditions,
                                   premiseLocation: premiseLocation,
                                   notes: notes)
