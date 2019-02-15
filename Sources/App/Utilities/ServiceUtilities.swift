@@ -190,13 +190,13 @@ class ServiceUtilities {
         
         let shell = try req.make(Shell.self)
         
-        let apnsURL: String
-        if Environment.IS_PRODUCTION_ENVIRONMENT {
-            apnsURL = "https://api.push.apple.com/3/device/"
-        }
-        else {
-            apnsURL =  "https://api.development.push.apple.com/3/device/"
-        }
+        let apnsURL: String = "https://api.development.push.apple.com/3/device/"
+//        if Environment.IS_PRODUCTION_ENVIRONMENT {
+//            apnsURL = "https://api.push.apple.com/3/device/"
+//        }
+//        else {
+//            apnsURL =  "https://api.development.push.apple.com/3/device/"
+//        }
         let password = Environment.PUSH_CERTIFICATE_PWD
         let bundleId = Environment.BUNDLE_IDENTIFIER
         
