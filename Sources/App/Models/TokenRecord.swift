@@ -11,6 +11,10 @@ import Authentication
 
 final class TokenRecord: Content {
     
+    struct Public: Content {
+        var accessToken: String
+    }
+    
     var id: Int?
     var token: String
     var userId: User.ID
@@ -18,6 +22,10 @@ final class TokenRecord: Content {
     init(token: String, userId: User.ID) {
         self.token = token
         self.userId = userId
+    }
+    
+    func mapToPublic() -> Public {
+        return Public(accessToken: token)
     }
 }
 

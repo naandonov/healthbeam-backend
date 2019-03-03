@@ -14,13 +14,17 @@ class ClientPatientsController: RouteCollection {
         
         let patientsRouter = router.grouped("patients").authorizedRouter()
 //        ServiceUtilities.generateOperations(router: patientsRouter, for: Patient.self, requireAuthorization: true, operationsSelector: .getAll)
-        ServiceUtilities.generateBatchOperation(router: patientsRouter, type: Patient.self, queryConfigurations: [.filter(keyName: "fullName")])
+        ServiceUtilities.generateBatchOperation(router: patientsRouter, type: Patient.self) { user in
+            return [.searchQuery(keyName: "fullName"), .filter(keyValuePairs:["premiseId" : "\(user.premiseId)"]), .sort(keyName: "fullName", isAscending: true)]
+        }
         
         patientsRouter.delete(Patient.parameter, use: PatientServices.deletePatient)
-//        patientsRouter.get(Patient.parameter, use: PatientServices.getPatient)
+        patientsRouter.get(Patient.parameter, use: PatientServices.getPatient)
+        patientsRouter.get(Patient.parameter, "attributes", use: PatientServices.getPatientAttributes)
 //        patientsRouter.get(use: PatientServices.getAllPatients)
         patientsRouter.post(Patient.Public.self, at: "/", use: PatientServices.cretePatient)
         patientsRouter.put(Patient.Public.self, at: "/", use: PatientServices.updatePatient)
+        patientsRouter.post("nearby", use: PatientServices.getNearbyPatientsForTags)
 //      patientsRouter.get("query", use: PatientServices.searchPatients)
     }
 }

@@ -8,18 +8,23 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
                         <link rel="stylesheet" href="assets/css/styles.min.css">
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+                            
     </head>
     
     <body style="background-color:#eef4f7;">
-        <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></div>
+        <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><a href="/home"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></a></div>
         <div class="login-clean" style="background-color:rgb(238,244,247);">
-            <form action="/weblogin" method="post">
+            <form method="post" action="\creategateway">
                 <h2 class="sr-only">Login Form</h2>
-                <h2 class="text-center">Authentication</h2>
+                <h2 class="text-center">Create Gateway</h2>
                 <div class="illustration"></div>
-                <div class="form-group"><input class="form-control" type="email" name="email" placeholder="Email" aria-describedby="inputGroupPrepend" required></div>
-                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Password" minlength="6" aria-describedby="inputGroupPrepend" id="password" required></div>
-                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color:rgb(111,199,236);">Log In</button></div><a href="#" class="forgot">Forgot your email or password?</a></form>
+                <div class="form-group"><input name="codeIdentifier" placeholder="Code Identifier
+                    " required class="form-control" /></div>
+                <div class="form-group"><input name="name" required placeholder="Name
+                    " class="form-control" /></div>
+                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color:rgb(111,199,236);">Create</button></div>
+            </form>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.bundle.min.js"></script>

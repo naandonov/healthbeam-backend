@@ -17,9 +17,7 @@ class WebAuthenticationController: RouteCollection {
         let authSessionRouter = router.authSessionRouter()
         let protectedRouter = authSessionRouter.protectedRouter()
         
-        protectedRouter.get(WebConstants.CreateAccountDirectory){ request -> Future<View> in
-            return try request.view().render("create-account")
-        }
+        protectedRouter.get(WebConstants.CreateAccountDirectory, use: AuthenticationServices.renderRegistration)
         
         //Triggers
         protectedRouter.post("webregister", use: AuthenticationServices.webRegister)

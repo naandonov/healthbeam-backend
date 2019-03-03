@@ -15,6 +15,11 @@ final class Patient: Content {
         var patientId: Int
     }
     
+    struct SubscriptionToggleResult: Content {
+        let isSubscribed: Bool
+        var patientId: Int
+    }
+    
     struct Public: Content {
         var id: Int?
         var fullName: String
@@ -22,20 +27,26 @@ final class Patient: Content {
         var personalIdentification: String
         var birthDate: Date
         var bloodType: String
-        var alergies: [String]
-        var premiseLocation: String
-        var patientTag: PatientTag.Public?
-        var healthRecords: [HealthRecord]?
+        var allergies: [String]
+        var chronicConditions: [String]
+
+        var premiseLocation: String?
+        var notes: String?
+//        var patientTag: PatientTag.Public?
+//        var healthRecords: [HealthRecord.Public]?
         
-        func privateModel() -> Patient {
+        func creationModel(premiseId: Premise.ID) -> Patient {
             return Patient(id: id,
                            fullName: fullName,
                            gender: gender,
                            personalIdentification: personalIdentification,
                            birthDate: birthDate,
                            bloodType: bloodType,
-                           alergies: alergies,
-                           premiseLocation: premiseLocation)
+                           allergies: allergies,
+                           chronicConditions: chronicConditions,
+                           premiseLocation: premiseLocation,
+                           notes: notes,
+                           premiseId: premiseId)
         }
     }
     
@@ -46,21 +57,39 @@ final class Patient: Content {
     var personalIdentification: String
     var birthDate: Date
     var bloodType: String
-    var alergies: [String]
-    var premiseLocation: String
+    var allergies: [String]
+    var chronicConditions: [String]
+    var premiseLocation: String?
+    var notes: String?
     
     var patientTagId: PatientTag.ID?
     
+    var premiseId: Premise.ID
     
-    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, alergies: [String], premiseLocation: String) {
+    
+    init(id: Int? = nil, fullName: String, gender: String, personalIdentification: String, birthDate: Date, bloodType: String, allergies: [String], chronicConditions: [String], premiseLocation: String?, notes: String?, premiseId: Premise.ID) {
         
         self.fullName = fullName
         self.gender = gender
         self.personalIdentification = personalIdentification
         self.birthDate = birthDate
         self.bloodType = bloodType
-        self.alergies = alergies
+        self.allergies = allergies
+        self.chronicConditions = chronicConditions
         self.premiseLocation = premiseLocation
+        self.notes = notes
+        self.premiseId = premiseId
+    }
+    
+    func updateFromPublic(_ publicPatient: Public) {
+       fullName = publicPatient.fullName
+       gender = publicPatient.gender
+       personalIdentification = publicPatient.personalIdentification
+       birthDate = publicPatient.birthDate
+       bloodType = publicPatient.bloodType
+       allergies = publicPatient.allergies
+       notes = publicPatient.notes
+       premiseLocation = publicPatient.premiseLocation
     }
 }
 
@@ -74,10 +103,10 @@ extension Patient: PublicMapper {
                                   personalIdentification: personalIdentification,
                                   birthDate: birthDate,
                                   bloodType: bloodType,
-                                  alergies: alergies,
+                                  allergies: allergies,
+                                  chronicConditions: chronicConditions,
                                   premiseLocation: premiseLocation,
-                                  patientTag: nil,
-                                  healthRecords: nil)
+                                  notes: notes)
     }
 }
 
@@ -92,6 +121,10 @@ extension Patient {
     
     var observers: Siblings<Patient, User, UserPatient> {
         return siblings()
+    }
+    
+    var premise: Parent<Patient, Premise> {
+        return parent(\.premiseId)
     }
 }
 

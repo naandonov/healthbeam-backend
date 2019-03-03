@@ -12,24 +12,35 @@ import FluentPostgreSQL
 class PatientTagServices {
     
     
-    class func assignPatientTag(request: Request, patientTag: PatientTag) throws -> Future<PatientTag> {
-        _ = try request.requireAuthenticated(User.self)
+    class func assignPatientTag(request: Request, patientTag: PatientTag) throws -> Future<ResultWrapper<PatientTag.Public>> {
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
-            PatientTag.query(on: request)
+            try PatientServices.validateInteraction(for: user, with: patient)
+            return PatientTag.query(on: request)
                 .filter(\.major == patientTag.major)
                 .filter(\.minor == patientTag.minor)
+                .join(\Patient.id, to: \PatientTag.patientId)
+                .filter(\Patient.premiseId == user.premiseId)
                 .first()
                 .flatMap({ existingPatientTag in
                     if let existingPatientTag = existingPatientTag {
                         existingPatientTag.patientId = patient.id
-                        return existingPatientTag.update(on: request)
-                    }
-                    else {
-                        patientTag.patientId = patient.id
-                        return patientTag.save(on: request).flatMap({ _ in
-                            patient.patientTagId = patientTag.id
-                            return patient.update(on: request).map({ _ -> PatientTag in
-                                patientTag
+                        return existingPatientTag.update(on: request).map({ tag in
+                            try tag.mapToPublic().parse()
+                        })
+                    } else {
+                        return try patient.patientTag.query(on: request).first().flatMap({ tag ->  Future<ResultWrapper<PatientTag.Public>> in
+                            if let unwrappedTag = tag {
+                                unwrappedTag.minor = patientTag.minor
+                                unwrappedTag.major = patientTag.major
+                                return unwrappedTag.update(on: request).map({ tag in
+                                    try tag.mapToPublic().parse()
+                                })
+                            }
+                            patientTag.patientId = patient.id
+                            return patientTag.save(on: request).flatMap({ tag in
+                                patient.patientTagId = patientTag.id
+                                return patient.update(on: request).transform(to: try tag.mapToPublic().parse())
                             })
                         })
                     }
@@ -37,10 +48,11 @@ class PatientTagServices {
         }
     }
     
-    class func unassignPatientTag(request: Request) throws -> Future<HTTPStatus> {
-        _ = try request.requireAuthenticated(User.self)
+    class func unassignPatientTag(request: Request) throws -> Future<FormattedResultWrapper> {
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
-            return try unassignPatientTag(for: patient, on: request)
+            try PatientServices.validateInteraction(for: user, with: patient)
+            return try unassignPatientTag(for: patient, on: request).transform(to: FormattedResultWrapper(result: .success))
         }
     }
     
@@ -71,8 +83,9 @@ class PatientTagServices {
     }
     
     class func getPatientTag(request: Request) throws -> Future<PatientTag> {
-        _ = try request.requireAuthenticated(User.self)
+        let user = try request.requireAuthenticated(User.self)
         return try request.parameters.next(Patient.self).flatMap { patient in
+            try PatientServices.validateInteraction(for: user, with: patient)
             let notFound = Abort(.badRequest, reason: "The Specified Patient doesn't have an associated Tag")
             return try patient.patientTag
                 .query(on: request)

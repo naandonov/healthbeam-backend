@@ -22,17 +22,20 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     middlewares.use(SessionsMiddleware.self)
+    services.register(middlewares)
+    
+    services.register(Shell.self)
     
     let postgresqlConfig: PostgreSQLDatabaseConfig
-    if let url = Environment.get("DATABASE_URL") {
+    if let url = Environment.DATABASE_URL {
         postgresqlConfig = PostgreSQLDatabaseConfig(url: url)!
     }
     else {
         postgresqlConfig = PostgreSQLDatabaseConfig(
-            serverAddress: PostgreSQLConnection.ServerAddress.tcp(hostname: "baasu.db.elephantsql.com", port: 5432),
-            username: "vdwegziv",
-            database: "vdwegziv",
-            password: "WSDEkQDZdenEafNbJGoyCc80N02Jq391"
+            hostname: "localhost",
+            username: "nikolay.andonov",
+            database: "healthbeam",
+            password: nil
         )
     }
     
@@ -43,6 +46,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     databases.add(database: postgresqlDatabase, as: .psql)
     services.register(databases)
     
+    var commands = CommandConfig.default()
+    commands.useFluentCommands()
+    services.register(commands)
     
     /// Configure migrations
     var migrations = MigrationConfig()
@@ -54,6 +60,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: PatientTag.self, database: .psql)
     migrations.add(model: PatientAlert.self, database: .psql)
     migrations.add(model: Device.self, database: .psql)
+    migrations.add(model: Gateway.self, database: .psql)
+    migrations.add(model: Premise.self, database: .psql)
+    
+//    migrations.add(migration: NotesAndChronicConditionsToPatient, database: .psql)
+//    migrations.add(migration: AddGatewayTable.self, database: .psql)
     services.register(migrations)
     
     config.prefer(LeafRenderer.self, for: ViewRenderer.self)

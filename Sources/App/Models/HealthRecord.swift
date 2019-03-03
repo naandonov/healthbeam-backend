@@ -11,26 +11,6 @@ import FluentPostgreSQL
 
 final class HealthRecord: Content {
     
-    struct Request: Content {
-        var id: Int?
-
-        var diagnosis: String
-        var treatment: String
-        var prescription: String
-        var notes: String?
-        var createdDate: Date
-        
-        func model(with patientId: Patient.ID) -> HealthRecord {
-            return HealthRecord(id: id,
-                                diagnosis: diagnosis,
-                                treatment: treatment,
-                                prescription: prescription,
-                                notes: notes,
-                                createdDate: createdDate,
-                                patientId: patientId)
-        }
-    }
-    
     struct Public: Content {
         var id: Int?
         
@@ -40,6 +20,16 @@ final class HealthRecord: Content {
         var notes: String?
         var createdDate: Date
         var creator: User.ExternalPublic?
+        
+        func creationModel(with patientId: Patient.ID) -> HealthRecord {
+            return HealthRecord(id: id,
+                                diagnosis: diagnosis,
+                                treatment: treatment,
+                                prescription: prescription,
+                                notes: notes,
+                                createdDate: createdDate,
+                                patientId: patientId)
+        }
     }
     
     var id: Int?
@@ -72,6 +62,14 @@ final class HealthRecord: Content {
                                        creator: creator?.mapToExternalPublic())
     }
     
+    func updateFromPublic(_ publicRecord: Public) {
+        diagnosis = publicRecord.diagnosis
+        treatment = publicRecord.treatment
+        prescription = publicRecord.prescription
+        notes = publicRecord.notes
+        createdDate = publicRecord.createdDate
+    }
+    
 }
 
 extension HealthRecord {
@@ -81,12 +79,12 @@ extension HealthRecord {
 }
 
 extension HealthRecord: Migration {
-//    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
-//        return Database.create(self, on: connection) { builder in
-//            try addProperties(to: builder)
-//            builder.reference(from: \.patientId, to: \Patient.id)
-//        }
-//    }
+    //    public static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    //        return Database.create(self, on: connection) { builder in
+    //            try addProperties(to: builder)
+    //            builder.reference(from: \.patientId, to: \Patient.id)
+    //        }
+    //    }
 }
 
 extension HealthRecord: Parameter {}

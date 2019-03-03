@@ -36,23 +36,27 @@ final class PatientAlert: Content {
         var creationDate: String
         var respondDate: String?
         var status: String
+        var notes: String?
+        var gateway: Gateway.Public
         
         var patient: Patient.Public
         var responder: User.ExternalPublic?
         
         
-        init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil) throws {
-            self.id = try patientAlert.requireID()
-            self.creationDate = patientAlert.creationDate.extendedDateString()
+        init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil, gateway: Gateway, premise: Premise) throws {
+            id = try patientAlert.requireID()
+            creationDate = patientAlert.creationDate.extendedDateString()
             if let respondDate = patientAlert.respondDate {
                 self.respondDate = respondDate.extendedDateString()
             }
-            self.status = patientAlert.status
-            
+            status = patientAlert.status
+            notes = patientAlert.notes
             self.patient = try patient.mapToPublic()
             if let responder = responder {
                 self.responder = try responder.mapToExternalPublic()
             }
+
+            self.gateway = try gateway.mapToPublic(forPremise: premise.mapToPublic())
         }
     }
     
@@ -65,15 +69,26 @@ final class PatientAlert: Content {
     var creationDate: Date
     var respondDate: Date?
     var status: String
+    var notes: String?
     
     var patientId: Patient.ID?
     var responderId: User.ID?
+    var gatewayId: Gateway.ID
     
-    init(creationDate: Date, alertStatus: AlertStatus) {
+    
+    init(creationDate: Date, alertStatus: AlertStatus, gatewayId: Gateway.ID) {
         self.creationDate = creationDate
         self.status = alertStatus.rawValue
+        self.gatewayId = gatewayId
     }
     
+}
+
+extension PatientAlert {
+
+    var premise: Parent<PatientAlert, Gateway> {
+        return parent(\.gatewayId)
+    }
 }
 
 extension PatientAlert: Migration {
@@ -89,3 +104,18 @@ extension PatientAlert: Migration {
 extension PatientAlert: Parameter {}
 extension PatientAlert: PostgreSQLModel {}
 
+extension PatientAlert {
+    
+    var notificationExtra: [String: String] {
+        let idString: String
+        if let id = id {
+            idString = "\(id)"
+        } else {
+            idString = ""
+        }
+        return [
+            "alertId": idString,
+            "alertStatus": status
+        ]
+    }
+}

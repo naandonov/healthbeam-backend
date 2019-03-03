@@ -20,8 +20,11 @@ struct QueryCount: Content {
 }
 
 enum BatchQueryConfiguration {
-    case filter(keyName: String)
+    typealias InnerJoinStatement = (table: String, connectionKey: String, tableKey: String)
+    case searchQuery(keyName: String)
     case sort(keyName: String, isAscending: Bool)
+    case filter(keyValuePairs: [String: String])
+    case innerJoin(statements: [InnerJoinStatement])
 }
 
 enum CRUDOperationSelector {
@@ -91,27 +94,48 @@ class ServiceUtilities {
         }
     }
     
-    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, queryConfigurations: [BatchQueryConfiguration] = [], elementsInPage: Int = 20) where T: PublicMapper {
-        router.get() { request -> Future<BatchWrapper<T.PublicElement>> in
-            _ = try request.requireAuthenticated(User.self)
+    class func generateBatchOperation<T: CRUDModelProvider>(router: Router, type: T.Type, elementsInPage: Int = 20, userFilterClosure: ((User) -> [BatchQueryConfiguration])? = nil) where T: PublicMapper {
+        router.get() { request -> Future<ResultWrapper<BatchWrapper<T.PublicElement>>> in
+            let user = try request.requireAuthenticated(User.self)
             
             let tableName = String(describing: T.self)
-            var searchQuery = " FROM \"\(tableName)\""
+            var searchQuery = " FROM \(tableName.psqlFormatted)"
+            var sortQuery = ""
+            
+            var queryConfigurations: [BatchQueryConfiguration] = []
+            if let userFilterClosure = userFilterClosure {
+                queryConfigurations += userFilterClosure(user)
+            }
             
             for configuration in queryConfigurations {
                 switch configuration {
-                    
-                case let .filter(keyName):
+                case let .innerJoin(statements):
+                    for statement in statements {
+                        searchQuery += " INNER JOIN \(statement.table.psqlFormatted) ON \(statement.connectionKey.psqlFormatted)=\(statement.tableKey.psqlFormatted)"
+                    }
+                case let .searchQuery(keyName):
                     if let searchParameter = request.query[String.self, at: "search"] {
-                        searchQuery += " WHERE LOWER(\"\(keyName)\") LIKE LOWER('%\(searchParameter)%')"
+                        searchQuery += " WHERE LOWER(\(keyName.psqlFormatted)) LIKE LOWER('%\(searchParameter)%')"
+                    }
+                case .filter(let keyValuePairs):
+                    var appendStatement: String
+                    if searchQuery.contains("WHERE") {
+                        appendStatement = " AND"
+                    }
+                    else {
+                        appendStatement = " WHERE"
+                    }
+                    for (key, value) in keyValuePairs {
+                        searchQuery += "\(appendStatement) \(key.psqlFormatted) = '\(value)'"
+                        appendStatement = "AND"
                     }
                 case let .sort(keyName, isAscending):
-                    searchQuery += " ORDER BY (\"\(keyName)\") \(isAscending ? "ASC" : "DESC")"
+                    sortQuery = " ORDER BY \(keyName.psqlFormatted) \(isAscending ? "ASC" : "DESC")"
                 }
             }
             
-            let countQuery = "SELECT COUNT(id)" + searchQuery
-            var resultsQuery = "SELECT *" + searchQuery
+            let countQuery = "SELECT COUNT(\(tableName.psqlFormatted).id)" + searchQuery
+            var resultsQuery = "SELECT *" + searchQuery + sortQuery
             
             return request.withNewConnection(to: .psql) { connection in
                 return connection
@@ -125,7 +149,8 @@ class ServiceUtilities {
                                                 elementsInPage: 0,
                                                 totalPagesCount: 0,
                                                 totalElementsCount: 0,
-                                                result: [])
+                                                items: [])
+                                .parse()
                         }
                     }
                     
@@ -151,9 +176,60 @@ class ServiceUtilities {
                                                 elementsInPage: elements.count,
                                                 totalPagesCount: pagesCount,
                                                 totalElementsCount: elementsCount,
-                                                result: result)
+                                                items: result)
+                                .parse()
                     }
             }
         }
+    }
+    
+    class func pushToDeviceToken(_ token: String, _ payload: APNSPayload, _ req: Request) throws -> Future<HTTPStatus> {
+        guard let certURL = FileManager.shared.pushCertificateURL() else {
+            throw Abort(.notFound, reason: "Missing Push Certificate URL")
+        }
+        
+        let shell = try req.make(Shell.self)
+        
+        let apnsURL: String
+        if Environment.IS_PRODUCTION_ENVIRONMENT {
+            apnsURL = "https://api.push.apple.com/3/device/"
+        }
+        else {
+            apnsURL =  "https://api.development.push.apple.com/3/device/"
+        }
+        let password = Environment.PUSH_CERTIFICATE_PWD
+        let bundleId = Environment.BUNDLE_IDENTIFIER
+        
+        let content = APNSPayloadContent(payload: payload)
+        let data = try JSONEncoder().encode(content)
+        guard let jsonString = String(data: data, encoding: .utf8) else {
+            throw Abort(.custom(code: 512, reasonPhrase: "Invalid APNS payload"))
+        }
+        
+        let arguments = ["-d", jsonString, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certURL.relativePath):\(password)", apnsURL + token]
+        
+        return try shell.execute(commandName: "curl", arguments: arguments).map(to: HTTPStatus.self) { data in
+            print(data)
+            return .ok
+        }
+        
+    }
+    
+    class func stringArrayFormatted(_ array: [String]) -> String {
+        var result = "ARRAY["
+        for (index, value) in array.enumerated() {
+            if index > 0 {
+                result += ", "
+            }
+            result += "'\(value)'"
+        }
+        result += "]::text[]"
+        return result
+    }
+}
+
+extension String {
+    var psqlFormatted: String {
+        return self.split(separator: ".").map() { "\"\($0)\"" }.joined(separator: ".")
     }
 }

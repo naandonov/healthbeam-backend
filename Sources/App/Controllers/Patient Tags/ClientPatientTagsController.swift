@@ -13,6 +13,7 @@ class ClientPatientTagsController: RouteCollection {
     func boot(router: Router) throws {
         
         let patientTagRouter = router.grouped("patients", Patient.parameter).authorizedRouter()
+        
         patientTagRouter.post(PatientTag.self, at: "assignTag", use: PatientTagServices.assignPatientTag)
         patientTagRouter.delete("unassignTag", use: PatientTagServices.unassignPatientTag)
         patientTagRouter.get("tag", use: PatientTagServices.getPatientTag)

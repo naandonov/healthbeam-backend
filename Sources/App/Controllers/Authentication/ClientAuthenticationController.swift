@@ -14,6 +14,6 @@ class ClientAuthenticationController: RouteCollection {
         
         router.post("login", use: AuthenticationServices.login)
         router.authorizedRouter().post("register", use: AuthenticationServices.register)
-        router.authorizedRouter().get("logout", use: AuthenticationServices.logout)
+        router.authorizedRouter().post("logout", use: AuthenticationServices.logout)
     }
 }
