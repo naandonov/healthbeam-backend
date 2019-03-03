@@ -30,7 +30,7 @@
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
                         <div class="box"><i class="fa fa-warning icon" style="color:rgb(111,199,236);"></i>
                             <h3 class="name">Alert Records</h3>
-                            <p class="description">Explore all previous responses to patients in need of immediate medical attention</p><a href="patients-list" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
+                            <p class="description">Explore all previous responses to patients in need of immediate medical attention</p><a href="alert-records" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
                         <div class="box"><i class="fa fa-align-center icon" style="color:rgb(111,199,236);"></i>

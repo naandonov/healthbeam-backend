@@ -15,6 +15,16 @@ final class Patient: Content {
         var patientId: Int
     }
     
+    struct Renderable: Content {
+        var fullName: String
+        var gender: String
+        var personalIdentification: String
+        var age: String
+        var bloodType: String
+        var notes: String?
+        var premiseLocation: String?
+    }
+    
     struct SubscriptionToggleResult: Content {
         let isSubscribed: Bool
         var patientId: Int
@@ -107,6 +117,16 @@ extension Patient: PublicMapper {
                                   chronicConditions: chronicConditions,
                                   premiseLocation: premiseLocation,
                                   notes: notes)
+    }
+    
+    func mapToRenderabble() -> Patient.Renderable{
+        return Patient.Renderable(fullName: fullName,
+                                  gender: gender,
+                                  personalIdentification: personalIdentification,
+                                  age: birthDate.yearsSince(),
+                                  bloodType: bloodType,
+                                  notes: notes,
+                                  premiseLocation: premiseLocation)
     }
 }
 

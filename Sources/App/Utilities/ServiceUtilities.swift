@@ -206,7 +206,7 @@ class ServiceUtilities {
             throw Abort(.custom(code: 512, reasonPhrase: "Invalid APNS payload"))
         }
         
-        let arguments = ["-d", jsonString, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certURL.relativePath):\(password)", apnsURL + token]
+        let arguments = ["-d", jsonString, "-H", "apns-topic:\("io.healthbeam.mobile")", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certURL.relativePath):\("healthbeam")", apnsURL + token]
         
         return try shell.execute(commandName: "curl", arguments: arguments).map(to: HTTPStatus.self) { data in
             print(data)

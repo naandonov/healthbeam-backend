@@ -34,7 +34,7 @@ final class FileManager {
             return URL(fileURLWithPath: directory.workDir)
                 .appendingPathComponent("Resources", isDirectory: true)
                 .appendingPathComponent("aps_development.pem", isDirectory: false)
-        } else if Environment.IS_STAGING_ENVIRONMENT {
+        } else {//if Environment.IS_STAGING_ENVIRONMENT {
             return URL(fileURLWithPath: directory.workDir)
                 .appendingPathComponent("Resources", isDirectory: true)
                 .appendingPathComponent("aps_development.pem", isDirectory: false)

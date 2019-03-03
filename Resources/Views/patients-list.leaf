@@ -24,20 +24,24 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width:25%;text-align:center;">Name</th>
-                            <th style="width:25%;text-align:center;">Gender</th>
-                            <th style="width:25%;text-align:center;">Age</th>
-                            <th style="text-align:center;width:25%;">Premise Location</th>
+                            <th style="width:16%;text-align:center;">Name</th>
+                            <th style="width:16%;text-align:center;">Gender</th>
+                            <th style="width:16%;text-align:center;">Age</th>
+                            <th style="width:16%;text-align:center;">Blood Type</th>
+                            <th style="width:16%;text-align:center;">PID</th>
+                            <th style="width:16%;text-align:center;">Premise Location</th>
                         </tr>
                     </thead>
                     <tbody>
                         #for(patient in patients) {
 
                         <tr>
-                            <td style="width:25%;text-align:center;"><a href="#">#(patient.fullName)</a></td>
-                            <td style="text-align:center;width:25%;">#(patient.gender)</td>
-                            <td style="text-align:center;width:25%;">#(patient.premiseLocation)</td>
-                            <td style="text-align:center;width:20%;">#(patient.premiseLocation)</td>
+                            <td style="width:16%;text-align:center;"><a href="#">#(patient.fullName)</a></td>
+                            <td style="width:16%;text-align:center;">#(patient.gender)</td>
+                            <td style="width:16%;text-align:center;">#(patient.age)</td>
+                            <td style="width:16%;text-align:center;">#(patient.bloodType)</td>
+                            <td style="width:16%;text-align:center;">#(patient.personalIdentification)</td>
+                            <td style="width:16%;text-align:center;">#(patient.premiseLocation)</td>
                         </tr>
                         <tr></tr>
                         }
