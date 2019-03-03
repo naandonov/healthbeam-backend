@@ -23,19 +23,22 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width:25%;text-align:center;">Patient</th>
-                            <th style="text-align:center;width:25%;">Responder</th>
-                            <th style="width:25%;text-align:center;">Submit Date</th>
-                            <th style="width:25%;text-align:center;">Respond Date</th>
+                            <th style="width:20%;text-align:center;">Patient</th>
+                            <th style="width:20%;text-align:center;">Submit Date</th>
+                            <th style="text-align:center;width:20%;">Responder</th>
+                            <th style="width:20%;text-align:center;">Respond Date</th>
+                            <th style="text-align:center;width:20%;">Notes</th>
                         </tr>
                     </thead>
                     <tbody>
                          #for(record in records) {
                         <tr>
-                            <td style="width:25%;text-align:center;">#(record.patient.fullName)</td>
-                            <td style="text-align:center;width:25%;">#(record.responder.fullName)</td>
-                            <td style="text-align:center;width:25%;">#(record.creationDate)</td>
-                            <td style="text-align:center;width:25%;">#(record.respondDate)</td>
+                            <td style="width:20%;text-align:center;">#(record.patient.fullName)</td>
+                            <td style="text-align:center;width:20%;">#(record.creationDate)</td>
+                            <td style="text-align:center;width:20%;">#(record.responder.fullName)</td>
+                            <td style="text-align:center;width:20%;">#(record.respondDate)</td>
+                            <td style="text-align:center;width:20%;">#(record.notes)</td>
+                            
                         </tr>
                         <tr></tr>
                         }

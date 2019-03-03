@@ -153,7 +153,7 @@ class PatientServices {
             .sort(\Patient.fullName)
             .all()
             .flatMap { patients -> Future<View> in
-                let context = ["patients": patients]
+                let context = ["patients": patients.map{ $0.mapToRenderabble() }]
                 return try request.view().render("patients-list", context)
         }
     }

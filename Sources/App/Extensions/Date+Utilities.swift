@@ -12,6 +12,10 @@ extension Date {
     func extendedDateString() -> String {
         return DateFormatter.extendedDateFormatter.string(from: self)
     }
+    
+    func yearsSince() -> String {
+        return "\(Calendar.current.dateComponents([.year], from: self, to: Date()).year ?? 0)"
+    }
 }
 
 extension DateFormatter {
