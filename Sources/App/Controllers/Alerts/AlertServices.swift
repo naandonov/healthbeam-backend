@@ -240,7 +240,7 @@ class AlertServices {
                 guard let result = records.result else {
                     throw Abort(.badRequest)
                 }
-                let context = ["records": result]
+                let context = ["records": result.map({ $0.mapToRenderable() })]
                 return try request.view().render("alert-records", context)
         }
     }

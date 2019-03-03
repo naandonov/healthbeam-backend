@@ -30,11 +30,23 @@ enum AlertStatus: String {
 
 final class PatientAlert: Content {
     
+    
     struct Record: Content {
         
+        struct Renderable: Content {
+            var creationDate: String
+            var respondDate: String?
+            var status: String
+            var notes: String?
+            var gateway: Gateway.Public
+            
+            var patient: Patient.Public
+            var responder: User.ExternalPublic?
+        }
+        
         var id: PatientAlert.ID
-        var creationDate: String
-        var respondDate: String?
+        var creationDate: Date
+        var respondDate: Date?
         var status: String
         var notes: String?
         var gateway: Gateway.Public
@@ -45,9 +57,9 @@ final class PatientAlert: Content {
         
         init(patientAlert: PatientAlert, patient: Patient, responder: User?=nil, gateway: Gateway, premise: Premise) throws {
             id = try patientAlert.requireID()
-            creationDate = patientAlert.creationDate.extendedDateString()
+            creationDate = patientAlert.creationDate
             if let respondDate = patientAlert.respondDate {
-                self.respondDate = respondDate.extendedDateString()
+                self.respondDate = respondDate
             }
             status = patientAlert.status
             notes = patientAlert.notes
@@ -57,6 +69,16 @@ final class PatientAlert: Content {
             }
 
             self.gateway = try gateway.mapToPublic(forPremise: premise.mapToPublic())
+        }
+        
+        func mapToRenderable() -> Renderable {
+            return Renderable(creationDate: creationDate.extendedDateString(),
+                              respondDate: respondDate?.extendedDateString(),
+                              status: status,
+                              notes: notes,
+                              gateway: gateway,
+                              patient: patient,
+                              responder: responder)
         }
     }
     
