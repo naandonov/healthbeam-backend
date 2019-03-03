@@ -104,3 +104,18 @@ extension PatientAlert: Migration {
 extension PatientAlert: Parameter {}
 extension PatientAlert: PostgreSQLModel {}
 
+extension PatientAlert {
+    
+    var notificationExtra: [String: String] {
+        let idString: String
+        if let id = id {
+            idString = "\(id)"
+        } else {
+            idString = ""
+        }
+        return [
+            "alertId": idString,
+            "alertStatus": status
+        ]
+    }
+}

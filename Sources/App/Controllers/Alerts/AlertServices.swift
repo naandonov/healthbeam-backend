@@ -53,56 +53,84 @@ class AlertServices {
                         guard let patient = patientTag.patient else {
                             throw notAssociatedTag
                         }
-
+                        
                         return patient
                             .query(on: request)
                             .first()
                             .unwrap(or: notAssociatedTag)
                             .flatMap({ patient in
-
+                                
                                 return try PatientAlert.query(on: request)
                                     .filter(\.status == AlertStatus.pending.rawValue)
                                     .filter(\.patientId == patient.requireID())
                                     .first().flatMap({ alert in
-
+                                        
                                         if let _ = alert {
                                             throw Abort(.notFound, reason: "There is an existing pending alert for the specified patient.")
                                         }
-
+                                        
                                         let newAlert = try PatientAlert(creationDate: Date(), alertStatus: .pending, gatewayId: gateway.requireID())
                                         try newAlert.patientId = patient.requireID()
-
+                                        
                                         let patientObservers = try patient
                                             .observers
                                             .query(on: request)
                                             .all()
-
+                                        
                                         return newAlert
                                             .save(on: request)
                                             .and(patientObservers)
-                                            .flatMap({ (_, observers) -> Future<Void> in
-
-                                                var chainedResponse: [Future<Void>] = []
-                                                for user in observers {
-                                                    let userNotificationDispatch = try user
-                                                        .userDevice
-                                                        .query(on: request)
-                                                        .first()
-                                                        .flatMap{ device -> Future<Void> in
-                                                            if let device = device {
-                                                                let payload = APNSPayload.init(title: "Patient Alert", body: "\(patient.fullName) needs immediate assistance from \(gateway.name)")
-                                                                return try ServiceUtilities.pushToDeviceToken(device.deviceToken, payload, request).transform(to: ())
-                                                            }
-                                                            return Future.map(on: request) { }
-                                                    }
-                                                    chainedResponse.append(userNotificationDispatch)
-                                                }
-                                                return Future<Void>.andAll(chainedResponse, eventLoop: patientObservers.eventLoop)
+                                            .flatMap({ parameters -> Future<Void> in
+                                                
+                                                return try dispatchNotificationsForObservers(observers: parameters.1,
+                                                                                             title: "Patient Alert",
+                                                                                             body: "\(patient.fullName) needs immediate assistance from \(gateway.name)",
+                                                    extra: parameters.0.notificationExtra,
+                                                    request: request,
+                                                    eventLoop: patientObservers.eventLoop)
+                                                
+                                                
                                             }).transform(to: HTTPStatus.ok)
                                     })
                             })
                     })
             })
+    }
+    
+  
+    
+    private class func dispatchNotificationsForObservers(observers: [User], isSilentPush: Bool = false, title: String? = nil, body: String? = nil, extra: [String: String] = [:], request: Request, eventLoop: EventLoop) throws -> Future<Void> {
+        var chainedResponse: [Future<Void>] = []
+        for user in observers {
+            
+            let pendingAlerts = try getPendingAlerts(request)
+                .flatMap{ alerts -> Future<Void> in
+                    try user
+                        .userDevice
+                        .query(on: request)
+                        .first()
+                        .flatMap{ device -> Future<Void> in
+                            if let device = device {
+                                
+                                let payload: APNSPayload
+                                if let title = title, let body = body, !isSilentPush {
+                                    payload = APNSPayload(title: title,
+                                                          body: body)
+                                    payload.sound = "alarm.wav"
+                                } else {
+                                    payload = APNSPayload()
+                                    payload.contentAvailable = true
+                                }
+                                payload.badge = alerts.result?.count
+                                payload.extra = extra
+                                return try ServiceUtilities.pushToDeviceToken(device.deviceToken, payload, request).transform(to: ())
+                            }
+                            return Future.map(on: request) { }
+                    }
+            }
+            chainedResponse.append(pendingAlerts)
+        }
+        return Future<Void>.andAll(chainedResponse, eventLoop: eventLoop)
     }
     
     class func respondToAlert(_ request: Request, subscription: Patient.Subscribtion) throws -> Future<HTTPStatus> {
@@ -119,21 +147,35 @@ class AlertServices {
                     .join(\Patient.id, to: \PatientAlert.patientId)
                     .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
                     .first()
-                    .flatMap({ (alert: PatientAlert?) -> Future<PatientAlert> in
+                    .flatMap({ (alert: PatientAlert?) -> Future<Void> in
                         guard let alert = alert else {
                             throw notFound
                         }
                         alert.respondDate = Date()
                         alert.status = AlertStatus.responded.rawValue
                         alert.responderId = try user.requireID()
+                        
+                        let patientObservers = try patient
+                            .observers
+                            .query(on: request)
+                            .all()
+                        
                         return alert.update(on: request)
+                            .and(patientObservers)
+                            .flatMap{ (_, observers) -> Future<Void> in
+                                return try dispatchNotificationsForObservers(observers: observers,
+                                                                             isSilentPush: true,
+                                                                             extra: alert.notificationExtra,
+                                                                             request: request,
+                                                                             eventLoop: patientObservers.eventLoop)
+                        }
                     })
                     .transform(to: HTTPStatus.ok)
             })
     }
     
     
-    class func getPendingAlerts(_ request: Request) throws -> Future<[PatientAlert.Record]> {
+    class func getPendingAlerts(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         let user = try request.requireAuthenticated(User.self)
         return try user.patientSubscriptions
             .query(on: request)
@@ -148,11 +190,10 @@ class AlertServices {
             .map({ joinedTables in
                 try joinedTables.map {
                     try PatientAlert.Record(patientAlert: $0.0.0.1, patient: $0.0.0.0, gateway: $0.0.1, premise: $0.1)
-                }
+                }.parse()
             })
     }
-    
-    class func getAllCompletedAlertRecords(_ request: Request) throws -> Future<[PatientAlert.Record]> {
+    class func getAllCompletedAlertRecords(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         let user = try request.requireAuthenticated(User.self)
         return try user.patientSubscriptions
             .query(on: request)
@@ -167,11 +208,11 @@ class AlertServices {
             .map({ joinedTables in
                 try joinedTables.map {
                     try PatientAlert.Record(patientAlert: $0.0.0.1, patient: $0.0.0.0, gateway: $0.0.1, premise: $0.1)
-                }
+                }.parse()
             })
     }
-
-    class func getUserRespondedAlertRecords(_ request: Request) throws -> Future<[PatientAlert.Record]> {
+    
+    class func getUserRespondedAlertRecords(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         let user = try request.requireAuthenticated(User.self)
         return try user.patientSubscriptions
             .query(on: request)
@@ -186,7 +227,7 @@ class AlertServices {
             .map({ joinedTables in
                 try joinedTables.map {
                     try PatientAlert.Record(patientAlert: $0.0.0.1, patient: $0.0.0.0, gateway: $0.0.1, premise: $0.1)
-                }
+                }.parse()
             })
     }
     
