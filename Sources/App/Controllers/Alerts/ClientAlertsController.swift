@@ -18,6 +18,6 @@ class ClientAlertsController: RouteCollection {
         alertRouter.get("pending", use: AlertServices.getPendingAlerts)
         alertRouter.get("responded", use: AlertServices.getUserRespondedAlertRecords)
         alertRouter.get("records", use: AlertServices.getAllCompletedAlertRecords)
-    }
-    
+        alertRouter.get(PatientTag.ID.parameter, use: AlertServices.getAlert)
+    }    
 }

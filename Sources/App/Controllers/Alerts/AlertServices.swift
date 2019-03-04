@@ -16,27 +16,27 @@ class AlertServices {
     
     class func createAlert(_ request: Request, encoding: PatientAlert.Encoded) throws -> Future<HTTPStatus> {
         
-//        guard let encryptedData = Data.init(fromHexEncodedString: encoding.value) else {
-//            throw Abort(.badRequest, reason:"Missing Ecnrypted Data")
-//        }
-//
-//        let privateKey = try FileManager.shared.privateKeyContent()
-//        let decryptedData = try RSA.decrypt(encryptedData, padding: .pkcs1, key: .private(pem: privateKey))
-//
-//        guard let decryptedString = String(data: decryptedData, encoding: .utf8),
-//            decryptedString.split(separator: "&").count == 4 else {
-//                throw Abort(.badRequest, reason:"Invalid request")
-//        }
+        guard let encryptedData = Data.init(fromHexEncodedString: encoding.value) else {
+            throw Abort(.badRequest, reason:"Missing Ecnrypted Data")
+        }
 
-        let decryptedValues = encoding.value.split(separator: "&")
+        let privateKey = try FileManager.shared.privateKeyContent()
+        let decryptedData = try RSA.decrypt(encryptedData, padding: .pkcs1, key: .private(pem: privateKey))
+
+        guard let decryptedString = String(data: decryptedData, encoding: .utf8),
+            decryptedString.split(separator: "&").count == 4 else {
+                throw Abort(.badRequest, reason:"Invalid request")
+        }
+
+        let decryptedValues = decryptedString.split(separator: "&")
         let requestTimeInterval = TimeInterval(decryptedValues[0])!
         let minor = Int(decryptedValues[1])!
         let major = Int(decryptedValues[2])!
         let gatewayIdentifier = String(decryptedValues[3])
-//
-//        if (Date().timeIntervalSince1970 - requestTimeInterval) > 10 {
-//            throw Abort(.badRequest, reason:"Invalid request")
-//        }
+
+        if (Date().timeIntervalSince1970 - requestTimeInterval) > 10 {
+            throw Abort(.badRequest, reason:"Invalid request")
+        }
 
         return Gateway.query(on: request)
             .filter(\Gateway.codeIdentifier, .equal, gatewayIdentifier)
@@ -186,11 +186,18 @@ class AlertServices {
             .alsoDecode(Gateway.self)
             .join(\Premise.id, to: \Gateway.premiseId)
             .alsoDecode(Premise.self)
+            .join(\PatientTag.patientId, to: \Patient.id)
+            .alsoDecode(PatientTag.self)
+            .sort(\PatientAlert.creationDate, .descending)
             .all()
             .map({ joinedTables in
                 try joinedTables.map {
-                    try PatientAlert.Record(patientAlert: $0.0.0.1, patient: $0.0.0.0, gateway: $0.0.1, premise: $0.1)
-                }.parse()
+                    try PatientAlert.Record(patientAlert: $0.0.0.0.1,
+                                            patient: $0.0.0.0.0,
+                                            gateway: $0.0.0.1,
+                                            premise: $0.0.1,
+                                            patientTag: $0.1)
+                    }.parse()
             })
     }
     class func getAllCompletedAlertRecords(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
@@ -205,10 +212,18 @@ class AlertServices {
             .alsoDecode(Premise.self)
             .join(\User.id, to: \PatientAlert.responderId)
             .alsoDecode(User.self)
+            .join(\PatientTag.patientId, to: \Patient.id)
+            .alsoDecode(PatientTag.self)
+            .sort(\PatientAlert.creationDate, .descending)
             .all()
             .map({ joinedTables in
                 try joinedTables.map {
-                    try PatientAlert.Record(patientAlert: $0.0.0.0.1, patient: $0.0.0.0.0, responder:$0.1 ,gateway: $0.0.0.1, premise: $0.0.1)
+                    try PatientAlert.Record(patientAlert: $0.0.0.0.0.1,
+                                            patient: $0.0.0.0.0.0,
+                                            responder: $0.0.1,
+                                            gateway: $0.0.0.0.1,
+                                            premise: $0.0.0.1,
+                                            patientTag: $0.1)
                 }.parse()
             })
     }
@@ -224,11 +239,44 @@ class AlertServices {
             .alsoDecode(Gateway.self)
             .join(\Premise.id, to: \Gateway.premiseId)
             .alsoDecode(Premise.self)
+            .join(\PatientTag.patientId, to: \Patient.id)
+            .alsoDecode(PatientTag.self)
+            .sort(\PatientAlert.creationDate, .descending)
             .all()
             .map({ joinedTables in
                 try joinedTables.map {
-                    try PatientAlert.Record(patientAlert: $0.0.0.1, patient: $0.0.0.0, gateway: $0.0.1, premise: $0.1)
+                    try PatientAlert.Record(patientAlert: $0.0.0.0.1,
+                                            patient: $0.0.0.0.0,
+                                            gateway: $0.0.0.1,
+                                            premise: $0.0.1,
+                                            patientTag: $0.1)
                 }.parse()
+            })
+    }
+    
+    class func getAlert(_ request: Request) throws -> Future<ResultWrapper<PatientAlert.Record>> {
+        let user = try request.requireAuthenticated(User.self)
+        let pateintAlertId = try request.parameters.next(Int.self)
+        return try user.patientSubscriptions
+            .query(on: request)
+            .join(\PatientAlert.patientId, to: \Patient.id)
+            .filter(\PatientAlert.id == pateintAlertId)
+            .alsoDecode(PatientAlert.self)
+            .join(\Gateway.id, to: \PatientAlert.gatewayId)
+            .alsoDecode(Gateway.self)
+            .join(\Premise.id, to: \Gateway.premiseId)
+            .alsoDecode(Premise.self)
+            .join(\PatientTag.patientId, to: \Patient.id)
+            .alsoDecode(PatientTag.self)
+            .first()
+            .unwrap(or: Abort(.notFound))
+            .map({ joinedTables in
+                
+                return try PatientAlert.Record(patientAlert: joinedTables.0.0.0.1,
+                                               patient: joinedTables.0.0.0.0,
+                                               gateway: joinedTables.0.0.1,
+                                               premise: joinedTables.0.1,
+                                               patientTag: joinedTables.1).parse()
             })
     }
     
