@@ -15,6 +15,11 @@ final class Patient: Content {
         var patientId: Int
     }
     
+    struct Respond: Content {
+        var patientId: Int
+        var notes: String?
+    }
+    
     struct Renderable: Content {
         var fullName: String
         var gender: String

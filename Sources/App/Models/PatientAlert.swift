@@ -30,6 +30,9 @@ enum AlertStatus: String {
 
 final class PatientAlert: Content {
     
+    struct Details: Content {
+        var count: Int
+    }
     
     struct Record: Content {
         

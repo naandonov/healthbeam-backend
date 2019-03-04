@@ -133,7 +133,7 @@ class AlertServices {
         return Future<Void>.andAll(chainedResponse, eventLoop: eventLoop)
     }
     
-    class func respondToAlert(_ request: Request, subscription: Patient.Subscribtion) throws -> Future<HTTPStatus> {
+    class func respondToAlert(_ request: Request, subscription: Patient.Respond) throws -> Future<FormattedResultWrapper> {
         let user = try request.requireAuthenticated(User.self)
         let notFound = Abort(.notFound, reason: "No alert exists for the subscribed patients")
         return try user.patientSubscriptions
@@ -154,6 +154,7 @@ class AlertServices {
                         alert.respondDate = Date()
                         alert.status = AlertStatus.responded.rawValue
                         alert.responderId = try user.requireID()
+                        alert.notes = subscription.notes
                         
                         let patientObservers = try patient
                             .observers
@@ -170,10 +171,21 @@ class AlertServices {
                                                                              eventLoop: patientObservers.eventLoop)
                         }
                     })
-                    .transform(to: HTTPStatus.ok)
+                    .transform(to: FormattedResultWrapper(result: .success))
             })
     }
     
+    class func getPendingAlertsCount(_ request: Request) throws -> Future<ResultWrapper<PatientAlert.Details>> {
+        let user = try request.requireAuthenticated(User.self)
+        return try user.patientSubscriptions
+            .query(on: request)
+            .join(\PatientAlert.patientId, to: \Patient.id)
+            .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
+            .count()
+            .map { count in
+                return PatientAlert.Details(count: count).parse()
+        }
+    }
     
     class func getPendingAlerts(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         let user = try request.requireAuthenticated(User.self)
