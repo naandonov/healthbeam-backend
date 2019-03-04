@@ -99,7 +99,7 @@ class AlertServices {
     
   
     
-    private class func dispatchNotificationsForObservers(observers: [User], isSilentPush: Bool = false, title: String? = nil, body: String? = nil, extra: [String: String] = [:], request: Request, eventLoop: EventLoop) throws -> Future<Void> {
+    class func dispatchNotificationsForObservers(observers: [User], isSilentPush: Bool = false, title: String? = nil, body: String? = nil, extra: [String: String] = [:], request: Request, eventLoop: EventLoop) throws -> Future<Void> {
         var chainedResponse: [Future<Void>] = []
         for user in observers {
             

@@ -72,7 +72,22 @@ class PatientTagServices {
                             .first()
                             .flatMap({ patientAlert in
                                 if let patientAlert = patientAlert {
-                                    return patientAlert.delete(on: request).transform(to: HTTPStatus.ok)
+                                    let patientObservers = try patient
+                                        .observers
+                                        .query(on: request)
+                                        .all()
+                                    
+                                    return patientAlert
+                                        .delete(on: request)
+                                        .and(patientObservers)
+                                        .flatMap{ parameters -> Future<HTTPStatus> in
+                                            return try AlertServices.dispatchNotificationsForObservers(observers: parameters.1,
+                                                                                         isSilentPush: true,
+                                                                                         extra: patientAlert.notificationExtra,
+                                                                                         request: request,
+                                                                                         eventLoop: patientObservers.eventLoop)
+                                                .transform(to: HTTPStatus.ok)
+                                    }
                                 }
                                 return Future.map(on: request, {
                                     HTTPStatus.ok
