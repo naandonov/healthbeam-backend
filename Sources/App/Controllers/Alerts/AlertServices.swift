@@ -103,8 +103,8 @@ class AlertServices {
         var chainedResponse: [Future<Void>] = []
         for user in observers {
             
-            let pendingAlerts = try getPendingAlerts(request)
-                .flatMap{ alerts -> Future<Void> in
+            let pendingAlerts = try getPendingAlertsCount(request, user: user)
+                .flatMap{ alertsCount -> Future<Void> in
                     try user
                         .userDevice
                         .query(on: request)
@@ -121,7 +121,7 @@ class AlertServices {
                                     payload = APNSPayload()
                                     payload.contentAvailable = true
                                 }
-                                payload.badge = alerts.result?.count
+                                payload.badge = alertsCount.result?.count
                                 payload.extra = extra
                                 return try ServiceUtilities.pushToDeviceToken(device.deviceToken, payload, request).transform(to: ())
                             }
@@ -177,6 +177,10 @@ class AlertServices {
     
     class func getPendingAlertsCount(_ request: Request) throws -> Future<ResultWrapper<PatientAlert.Details>> {
         let user = try request.requireAuthenticated(User.self)
+        return try getPendingAlertsCount(request, user: user)
+    }
+    
+    private class func getPendingAlertsCount(_ request: Request, user: User) throws -> Future<ResultWrapper<PatientAlert.Details>> {
         return try user.patientSubscriptions
             .query(on: request)
             .join(\PatientAlert.patientId, to: \Patient.id)
@@ -187,8 +191,7 @@ class AlertServices {
         }
     }
     
-    class func getPendingAlerts(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
-        let user = try request.requireAuthenticated(User.self)
+    private class func getPendingAlerts(_ request: Request, user: User) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         return try user.patientSubscriptions
             .query(on: request)
             .join(\PatientAlert.patientId, to: \Patient.id)
@@ -212,6 +215,12 @@ class AlertServices {
                     }.parse()
             })
     }
+    
+    class func getPendingAlerts(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
+        let user = try request.requireAuthenticated(User.self)
+        return try getPendingAlerts(request, user: user)
+    }
+    
     class func getAllCompletedAlertRecords(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
         let user = try request.requireAuthenticated(User.self)
         return try user.patientSubscriptions
