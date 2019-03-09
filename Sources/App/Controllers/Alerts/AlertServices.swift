@@ -133,7 +133,7 @@ class AlertServices {
         return Future<Void>.andAll(chainedResponse, eventLoop: eventLoop)
     }
     
-    class func respondToAlert(_ request: Request, subscription: Patient.Respond) throws -> Future<FormattedResultWrapper> {
+    class func respondToAlert(_ request: Request, subscription: Patient.Respond) throws -> Future<ResultWrapper<PatientAlert.Respond>> {
         let user = try request.requireAuthenticated(User.self)
         let notFound = Abort(.notFound, reason: "No alert exists for the subscribed patients")
         return try user.patientSubscriptions
@@ -147,7 +147,7 @@ class AlertServices {
                     .join(\Patient.id, to: \PatientAlert.patientId)
                     .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
                     .first()
-                    .flatMap({ (alert: PatientAlert?) -> Future<Void> in
+                    .flatMap({ (alert: PatientAlert?) -> Future<ResultWrapper<PatientAlert.Respond>> in
                         guard let alert = alert else {
                             throw notFound
                         }
@@ -163,15 +163,18 @@ class AlertServices {
                         
                         return alert.update(on: request)
                             .and(patientObservers)
-                            .flatMap{ (_, observers) -> Future<Void> in
-                                return try dispatchNotificationsForObservers(observers: observers,
-                                                                             isSilentPush: true,
-                                                                             extra: alert.notificationExtra,
-                                                                             request: request,
-                                                                             eventLoop: patientObservers.eventLoop)
+                            .flatMap{ parameters -> Future<ResultWrapper<PatientAlert.Respond>> in
+                                return try getPendingAlertsCount(request, user: user)
+                                    .flatMap{ alertsCount -> Future<ResultWrapper<PatientAlert.Respond>> in
+                                        return try dispatchNotificationsForObservers(observers: parameters.1,
+                                                                                     isSilentPush: true,
+                                                                                     extra: alert.notificationExtra,
+                                                                                     request: request,
+                                                                                     eventLoop: patientObservers.eventLoop)
+                                            .transform(to: PatientAlert.Respond(remainingPendingAlertsCount: alertsCount.result?.count).parse())
+                                }
                         }
                     })
-                    .transform(to: FormattedResultWrapper(result: .success))
             })
     }
     

@@ -34,6 +34,10 @@ final class PatientAlert: Content {
         var count: Int
     }
     
+    struct Respond: Content {
+        var remainingPendingAlertsCount: Int?
+    }
+    
     struct Record: Content {
         
         struct Renderable: Content {
