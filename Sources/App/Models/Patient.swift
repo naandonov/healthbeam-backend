@@ -97,14 +97,15 @@ final class Patient: Content {
     }
     
     func updateFromPublic(_ publicPatient: Public) {
-       fullName = publicPatient.fullName
-       gender = publicPatient.gender
-       personalIdentification = publicPatient.personalIdentification
-       birthDate = publicPatient.birthDate
-       bloodType = publicPatient.bloodType
-       allergies = publicPatient.allergies
-       notes = publicPatient.notes
-       premiseLocation = publicPatient.premiseLocation
+        fullName = publicPatient.fullName
+        gender = publicPatient.gender
+        personalIdentification = publicPatient.personalIdentification
+        birthDate = publicPatient.birthDate
+        bloodType = publicPatient.bloodType
+        allergies = publicPatient.allergies
+        chronicConditions = publicPatient.chronicConditions
+        notes = publicPatient.notes
+        premiseLocation = publicPatient.premiseLocation
     }
 }
 
