@@ -139,42 +139,35 @@ class AlertServices {
         return try user.patientSubscriptions
             .query(on: request)
             .filter(\.id == subscription.patientId)
+            .join(\PatientAlert.patientId, to: \Patient.id)
+            .alsoDecode(PatientAlert.self)
+            .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
             .first()
-            .unwrap(or: notFound).flatMap({ (patient: Patient) in
+            .unwrap(or: notFound).flatMap({ (patient: Patient, alert: PatientAlert) -> Future<ResultWrapper<PatientAlert.Respond>> in
                 try PatientServices.validateInteraction(for: user, with: patient)
-                return PatientAlert
+                alert.respondDate = Date()
+                alert.status = AlertStatus.responded.rawValue
+                alert.responderId = try user.requireID()
+                alert.notes = subscription.notes
+                
+                let patientObservers = try patient
+                    .observers
                     .query(on: request)
-                    .join(\Patient.id, to: \PatientAlert.patientId)
-                    .filter(\PatientAlert.status == AlertStatus.pending.rawValue)
-                    .first()
-                    .flatMap({ (alert: PatientAlert?) -> Future<ResultWrapper<PatientAlert.Respond>> in
-                        guard let alert = alert else {
-                            throw notFound
+                    .all()
+                
+                return alert.update(on: request)
+                    .and(patientObservers)
+                    .flatMap{ parameters -> Future<ResultWrapper<PatientAlert.Respond>> in
+                        return try getPendingAlertsCount(request, user: user)
+                            .flatMap{ alertsCount -> Future<ResultWrapper<PatientAlert.Respond>> in
+                                return try dispatchNotificationsForObservers(observers: parameters.1,
+                                                                             isSilentPush: true,
+                                                                             extra: alert.notificationExtra,
+                                                                             request: request,
+                                                                             eventLoop: patientObservers.eventLoop)
+                                    .transform(to: PatientAlert.Respond(remainingPendingAlertsCount: alertsCount.result?.count).parse())
                         }
-                        alert.respondDate = Date()
-                        alert.status = AlertStatus.responded.rawValue
-                        alert.responderId = try user.requireID()
-                        alert.notes = subscription.notes
-                        
-                        let patientObservers = try patient
-                            .observers
-                            .query(on: request)
-                            .all()
-                        
-                        return alert.update(on: request)
-                            .and(patientObservers)
-                            .flatMap{ parameters -> Future<ResultWrapper<PatientAlert.Respond>> in
-                                return try getPendingAlertsCount(request, user: user)
-                                    .flatMap{ alertsCount -> Future<ResultWrapper<PatientAlert.Respond>> in
-                                        return try dispatchNotificationsForObservers(observers: parameters.1,
-                                                                                     isSilentPush: true,
-                                                                                     extra: alert.notificationExtra,
-                                                                                     request: request,
-                                                                                     eventLoop: patientObservers.eventLoop)
-                                            .transform(to: PatientAlert.Respond(remainingPendingAlertsCount: alertsCount.result?.count).parse())
-                                }
-                        }
-                    })
+                }
             })
     }
     
