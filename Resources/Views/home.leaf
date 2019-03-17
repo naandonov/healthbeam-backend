@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">
                         <div class="box"><i class="fa fa-align-center icon" style="color:rgb(111,199,236);"></i>
-                            <h3 class="name">Gateway</h3>
+                            <h3 class="name">Create Gateway</h3>
                             <p class="description">Create gateway identification for monitoring patients' tag events.</p><a href="create-gateway" class="learn-more" style="color:rgb(111,199,236);">Go to page »</a></div>
                     </div>
                     <div class="col-sm-6 col-md-5 col-lg-4 item">

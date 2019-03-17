@@ -19,7 +19,7 @@
                 <h2 class="sr-only">Login Form</h2>
                 <h2 class="text-center">Create Gateway</h2>
                 <div class="illustration"></div>
-                <div class="tform-group"><input name="codeIdentifier" placeholder="Code Identifier
+                <div class="form-group"><input name="codeIdentifier" placeholder="Code Identifier
                     " required class="form-control" /></div>
                 <div class="form-group"><input name="name" required placeholder="Name
                     " class="form-control" /></div>
