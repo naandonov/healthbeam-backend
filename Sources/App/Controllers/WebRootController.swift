@@ -14,6 +14,7 @@ enum WebConstants {
     static let CreateGatewayDirectory = "create-gateway"
     static let AlertRecordsDirectory = "alert-records"
     static let PatientsListDirectory = "patients-list"
+    static let PatientDescriptionDirectory = "/patient"
     static let TermsAndConditionsDirectory = "terms-and-conditions"
     static let PrivacyPolicyDirectory = "privacy-policy"
     static let LoginDirectory = "/"

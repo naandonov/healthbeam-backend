@@ -13,5 +13,6 @@ class WebPatientsController: RouteCollection {
     func boot(router: Router) throws {
         
         router.get(WebConstants.PatientsListDirectory, use: PatientServices.renderPatientsList)
+        router.get(WebConstants.PatientDescriptionDirectory, use: PatientServices.renderPatientDescription)
     }
 }

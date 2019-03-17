@@ -13,7 +13,7 @@
 <body style="background-color:#eef4f7;">
     <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><a href="/home"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></a></div>
     <div class="patientsBlock" style="/*top:40px;*/padding:50px 0;height:536px;background-color:#eef4f7;">
-        <form id="patients" class="patients">
+        <form id="largeBlock" class="largeBlock">
             <h2 class="text-center" style="margin-top:5px;font-weight:bold;font-size:28px;margin-bottom:36px;color:inherit;">Patients</h2>
             
             #if(patients.count == 0) {
@@ -36,7 +36,7 @@
                         #for(patient in patients) {
 
                         <tr>
-                            <td style="width:16%;text-align:center;"><a href="#">#(patient.fullName)</a></td>
+                            <td style="width:16%;text-align:center;"><a href="/patient?id=#(patient.id)">#(patient.fullName)</a></td>
                             <td style="width:16%;text-align:center;">#(patient.gender)</td>
                             <td style="width:16%;text-align:center;">#(patient.age)</td>
                             <td style="width:16%;text-align:center;">#(patient.bloodType)</td>

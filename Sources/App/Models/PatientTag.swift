@@ -15,6 +15,10 @@ final class PatientTag: Content {
         var id: Int?
         var minor: Int
         var major: Int
+        
+        var representationName: String {
+            return "\(minor)-\(major)"
+        }
     }
     
     var id: Int?

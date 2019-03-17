@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthBeam</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/styles.min.css">
+</head>
+
+<body style="background-color:#eef4f7;">
+    <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><a href="/home"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></a></div>
+    <div class="patientsBlock" style="/*top:40px;*/padding:50px 0;height:536px;background-color:#eef4f7;">
+        <form id="patients" class="patients">
+            <h5 id="genderHeading">#(details.patient.gender)</h5>
+            <h2 class="text-center d-flex" style="margin-top:5px;font-weight:bold;font-size:28px;/*margin-bottom:36px;*/color:inherit;">#(details.patient.fullName)</h2>
+            <h5 id="premiseLocaitonHeading">#(details.patient.premiseLocation)</h5>
+            <div class="table-responsive" id="tableTop">
+                <table class="table">
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container">
+                <div class="intro"></div>
+                <div class="form-row justify-content-center features" style="/*width:968px;*/">
+                    <div class="col-sm-6 col-md-5 col-lg-4 d-flex flex-grow-1 flex-shrink-1 justify-content-center align-items-start align-self-center flex-wrap m-auto item" style="align-content:stretch;max-width:200px;">
+                        <div class="box" style="/*align-content:center;*/max-width:200px;"><img class="d-flex flex-row flex-grow-1 flex-shrink-1 align-content-center align-self-center flex-wrap" src="assets/img/avatar.png" style="/*width:100%;*//*width:200px;*/max-width:200px;/*min-width:0px;*//*align-self:left;*/">
+                            <h3 class="name"></h3>
+                        </div>
+                    </div>
+                    #if(details.patient.notes){
+                    <div class="col-sm-6 col-md-5 col-lg-8 item" style="/*width:400px;*/min-width:60%;/*padding-left:40px;*/">
+                        <div class="box" style="padding:0px;/*padding-left:50px;*/padding-top:20px;margin:10;">
+                            <h3 class="name">Notes</h3>
+                            <p class="description">#(details.patient.notes)</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="container justify-content-center align-items-center align-content-center" style="padding-top:40px;">
+                <div class="intro"></div>
+                <div class="form-row d-flex features" style="/*width:968px;*/">
+                    <div class="col-sm-6 col-md-5 col-lg-4 float-left d-flex flex-grow-1 flex-shrink-1 flex-fill justify-content-center align-items-center align-content-center flex-wrap m-auto item" style="border-style:solid;border-width:1px;border-color:#dee2e6;">
+                        <div class="box">
+                            <h4 class="justify-content-center align-items-center name" style="padding-top:10px;">#(details.patientAge)</h4>
+                            <p class="text-center d-flex justify-content-center description">Age</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-5 col-lg-4 item" style="border-style:solid;border-width:1px;border-color:#dee2e6;padding-top:10px;">
+                        <div class="box">
+                            <h4 class="d-flex justify-content-center name">#(details.patient.bloodType)</h4>
+                            <p class="d-flex justify-content-center description">Blood Type</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-5 col-lg-4 item" style="border-style:solid;border-width:1px;border-color:#dee2e6;padding-top:10px;">
+                        <div class="box">
+                            <h4 class="d-flex justify-content-center name">#if(details.patientTagRepresentation){#(details.patientTagRepresentation)}else{Unassigned}</h4>
+                            <p class="d-flex justify-content-center description">Patient Tag</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <form id="patient2" class="patient" style="margin-top:20px;">
+            <div class="container" id="containerDetails">
+                <form id="subCard3" class="subCard3">
+                    <div class="form-row" id="detailsRow">
+                        <div class="col">
+                            <div class="table-responsive" id="alergies">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th id="simpleTableCell" style="font-size:28px;">Allergies</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        #if(count(details.patient.allergies.count) == 0) {
+                                            <tr>
+                                                <td id="simpleTableCell" class="simpleTableCell">None</td>
+                                            </tr>
+                                        } else {
+                                            #for(allergy in details.patient.allergies) {
+                                                <tr>
+                                                    <td id="simpleTableCell" class="simpleTableCell"><img src="assets/img/pointDarkIcon.png" style="width:14px;/*padding-right:10px;*/margin-right:10px;">#(allergy)</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="table-responsive" id="alergies">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th id="simpleTableCell" style="font-size:28px;">Chronic Conditions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        #if(count(details.patient.chronicConditions) == 0) {
+                                        <tr>
+                                            <td id="simpleTableCell" class="simpleTableCell">None</td>
+                                        </tr>
+                                        } else {
+                                            #for(chronicCondition in details.patient.chronicConditions) {
+                                                <tr>
+                                                    <td id="simpleTableCell" class="simpleTableCell"><img src="assets/img/pointDarkIcon.png" style="width:14px;/*padding-right:10px;*/margin-right:10px;">#(chronicCondition)</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container justify-content-center align-items-center align-content-center" style="/*padding-top:40px;*/">
+                        <div class="intro"></div>
+                    </div>
+                    <header></header>
+                </form>
+                #for(healthRecord in details.attributes.healthRecords) {
+                    <form class="healthRec">
+                        <div class="container justify-content-center align-items-center align-content-center" id="healthRecord" style="/*padding-top:40px;*/">
+                            <div class="intro"></div>
+                            <div class="form-row" id="detailsRow">
+                                <div class="col" id="healthRecIconCont"><img class="d-flex" src="assets/img/healthRecordIcon.png" id="healthRecordIcon"></div>
+                                <div class="col">
+                                    <h2 class="text-center d-flex" style="margin-top:5px;font-weight:bold;font-size:28px;/*margin-bottom:36px;*/color:inherit;">#(healthRecord.diagnosis)</h2>
+                                    <h5>#(healthRecord.createdDateRepresentation)</h5>
+                                </div>
+                            </div>
+                            <p id="creatorParagraph">Created by #(healthRecord.creator.fullName) - #(healthRecord.creator.designation)</p>
+                            <h4>Treatment</h4>
+                            <p>#(healthRecord.treatment)</p>
+                            <h4 id="paragraphTitle">Prescription<br></h4>
+                            <p>#(healthRecord.prescription)</p>
+                            #if(healthRecord.notes) {
+                                <h4 id="paragraphTitle">Notes</h4>
+                                <p>#(healthRecord.notes)</p>
+                            }
+                        </div>
+                        <header></header>
+                    </form>
+                }
+            </div>
+        </form>
+    </div>
+    <div class="float-none features-boxed"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

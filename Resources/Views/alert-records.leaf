@@ -13,7 +13,7 @@
 <body style="background-color:rgb(238,244,247);">
     <div class="container-fluid" style="background-color:#ffffff;background-position:center;"><a href="/home"><img class="img-fluid d-flex flex-shrink-1 mx-auto" src="assets/img/logo1.png" width="500" style="width:500px;background-position:top;"></a></div>
     <div class="alertRecordsBlock" style="/*top:40px;*/padding:50px 0;height:536px;background-color:#eef4f7;">
-        <form id="alert-records" class="alert-records">
+        <form id="largeBlock" class="largeBlock">
             <h2 class="text-center" style="margin-top:5px;font-weight:bold;font-size:28px;margin-bottom:36px;color:inherit;">Alert Records</h2>
 
             #if(records.count == 0) {

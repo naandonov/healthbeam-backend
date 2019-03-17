@@ -98,29 +98,35 @@ class PatientServices {
         return try request
             .parameters
             .next(Patient.self).flatMap{ patient in
-                try validateInteraction(for: user, with: patient)
-                return try patient
-                    .healthRecords
+                return try getPatientAttributes(request, patient: patient, user: user).map { patientAttributes -> ResultWrapper<PatientAttributes> in
+                    return patientAttributes.parse()
+                }
+        }
+    }
+    
+    internal class func getPatientAttributes(_ request: Request, patient: Patient, user: User) throws -> Future<PatientAttributes> {
+        try validateInteraction(for: user, with: patient)
+        return try patient
+            .healthRecords
+            .query(on: request)
+            .join(\User.id, to: \HealthRecord.userId)
+            .alsoDecode(User.self)
+            .all()
+            .flatMap { healthRecordsTable in
+                
+                try patient
+                    .patientTag
                     .query(on: request)
-                    .join(\User.id, to: \HealthRecord.userId)
-                    .alsoDecode(User.self)
-                    .all()
-                    .flatMap { healthRecordsTable in
-                        
+                    .first().flatMap { patientTag in
                         try patient
-                            .patientTag
+                            .observers
                             .query(on: request)
-                            .first().flatMap { patientTag in
-                                try patient
-                                    .observers
-                                    .query(on: request)
-                                    .all()
-                                    .map { observers -> ResultWrapper<PatientAttributes> in
-                                        let patientAttributes = PatientAttributes(observers: try observers.map { try $0.mapToExternalPublic() },
-                                                                                  healthRecords: try healthRecordsTable.map { try $0.0.mapToPublic(creator: $0.1) },
-                                                                                  patientTag: try patientTag.map { try $0.mapToPublic()} )
-                                        return patientAttributes.parse()
-                                }
+                            .all()
+                            .map { observers -> PatientAttributes in
+                                let patientAttributes = PatientAttributes(observers: try observers.map { try $0.mapToExternalPublic() },
+                                                                          healthRecords: try healthRecordsTable.map { try $0.0.mapToPublic(creator: $0.1) },
+                                                                          patientTag: try patientTag.map { try $0.mapToPublic()} )
+                                return patientAttributes
                         }
                 }
         }
@@ -153,10 +159,33 @@ class PatientServices {
             .sort(\Patient.fullName)
             .all()
             .flatMap { patients -> Future<View> in
-                let context = ["patients": patients.map{ $0.mapToRenderabble() }]
+                let context = try ["patients": patients.map{ try $0.mapToRenderabble() }]
                 return try request.view().render("patients-list", context)
         }
     }
+    
+    class func renderPatientDescription(_ request: Request) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        guard let patientId = request.query[Int.self, at: "id"] else {
+            throw Abort(.badRequest)
+        }
+        return Patient
+            .query(on: request)
+            .filter(\.id == patientId)
+            .first()
+            .unwrap(or: Abort(.notFound))
+            .flatMap { patient in
+            return try PatientServices
+                .getPatientAttributes(request, patient: patient, user: user).flatMap({ attributes in
+                    let context =  ["details": Patient.RenderableDetial(patient: patient,
+                                                                        attributes: attributes,
+                                                                        patientAge: patient.birthDate.yearsSince(),
+                                                                        patientTagRepresentation: attributes.patientTag?.representationName)]
+                    return try request.view().render("patient-details", context)
+            })
+        }
+    }
+    
 }
 
 //MARK: - Utilitites

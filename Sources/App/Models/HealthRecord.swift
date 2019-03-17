@@ -20,6 +20,7 @@ final class HealthRecord: Content {
         var notes: String?
         var createdDate: Date
         var creator: User.ExternalPublic?
+        var createdDateRepresentation: String
         
         func creationModel(with patientId: Patient.ID) -> HealthRecord {
             return HealthRecord(id: id,
@@ -59,7 +60,8 @@ final class HealthRecord: Content {
                                        prescription: prescription,
                                        notes: notes,
                                        createdDate: createdDate,
-                                       creator: creator?.mapToExternalPublic())
+                                       creator: creator?.mapToExternalPublic(),
+                                       createdDateRepresentation: createdDate.simpleDateString())
     }
     
     func updateFromPublic(_ publicRecord: Public) {

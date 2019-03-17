@@ -10,7 +10,6 @@ import Vapor
 import FluentPostgreSQL
 
 final class Patient: Content {
-    
     struct Subscribtion: Content {
         var patientId: Int
     }
@@ -20,7 +19,15 @@ final class Patient: Content {
         var notes: String?
     }
     
+    struct RenderableDetial: Content {
+        var patient: Patient
+        var attributes: PatientAttributes
+        var patientAge: String
+        var patientTagRepresentation: String?
+    }
+    
     struct Renderable: Content {
+        var id: Int
         var fullName: String
         var gender: String
         var personalIdentification: String
@@ -125,14 +132,15 @@ extension Patient: PublicMapper {
                                   notes: notes)
     }
     
-    func mapToRenderabble() -> Patient.Renderable{
-        return Patient.Renderable(fullName: fullName,
-                                  gender: gender,
-                                  personalIdentification: personalIdentification,
-                                  age: birthDate.yearsSince(),
-                                  bloodType: bloodType,
-                                  notes: notes,
-                                  premiseLocation: premiseLocation)
+    func mapToRenderabble() throws -> Patient.Renderable{
+        return try Patient.Renderable(id: requireID(),
+                                      fullName: fullName,
+                                      gender: gender,
+                                      personalIdentification: personalIdentification,
+                                      age: birthDate.yearsSince(),
+                                      bloodType: bloodType,
+                                      notes: notes,
+                                      premiseLocation: premiseLocation)
     }
 }
 
