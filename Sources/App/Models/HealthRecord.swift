@@ -20,7 +20,7 @@ final class HealthRecord: Content {
         var notes: String?
         var createdDate: Date
         var creator: User.ExternalPublic?
-        var createdDateRepresentation: String
+        var createdDateRepresentation: String?
         
         func creationModel(with patientId: Patient.ID) -> HealthRecord {
             return HealthRecord(id: id,

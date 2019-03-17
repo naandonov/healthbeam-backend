@@ -82,7 +82,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        #if(count(details.patient.allergies.count) == 0) {
+                                        #if(count(details.patient.allergies) == 0) {
                                             <tr>
                                                 <td id="simpleTableCell" class="simpleTableCell">None</td>
                                             </tr>
