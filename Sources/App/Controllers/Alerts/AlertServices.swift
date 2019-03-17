@@ -218,8 +218,8 @@ class AlertServices {
     }
     
     class func getAllCompletedAlertRecords(_ request: Request) throws -> Future<ArrayResultWrapper<PatientAlert.Record>> {
-        let user = try request.requireAuthenticated(User.self)
-        return try user.patientSubscriptions
+        let _ = try request.requireAuthenticated(User.self)
+        return Patient
             .query(on: request)
             .join(\PatientAlert.patientId, to: \Patient.id)
             .alsoDecode(PatientAlert.self)
