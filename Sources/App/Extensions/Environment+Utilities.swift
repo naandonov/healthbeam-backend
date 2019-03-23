@@ -13,6 +13,10 @@ extension Environment {
         return Environment.get("DATABASE_URL")
     }
     
+    static var PRODUCTION_DATABASE_URL: String? {
+        return Environment.get("HEROKU_POSTGRESQL_MAUVE_URL")
+    }
+    
     static var IS_PRODUCTION_ENVIRONMENT: Bool {
         return Environment.get("ENVIRONMENT") == "Production"
     }
