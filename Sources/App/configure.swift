@@ -28,7 +28,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     let postgresqlConfig: PostgreSQLDatabaseConfig
     if let url = Environment.PRODUCTION_DATABASE_URL {
-        postgresqlConfig = PostgreSQLDatabaseConfig(url: url)!
+        postgresqlConfig = PostgreSQLDatabaseConfig(url: url, transport: .unverifiedTLS)!
     }
     else {
         postgresqlConfig = PostgreSQLDatabaseConfig(
