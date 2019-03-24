@@ -229,18 +229,17 @@ class AlertServices {
             .alsoDecode(Premise.self)
             .join(\User.id, to: \PatientAlert.responderId)
             .alsoDecode(User.self)
-            .join(\PatientTag.patientId, to: \Patient.id)
-            .alsoDecode(PatientTag.self)
             .sort(\PatientAlert.creationDate, .descending)
             .all()
             .map({ joinedTables in
                 try joinedTables.map {
-                    try PatientAlert.Record(patientAlert: $0.0.0.0.0.1,
-                                            patient: $0.0.0.0.0.0,
-                                            responder: $0.0.1,
-                                            gateway: $0.0.0.0.1,
-                                            premise: $0.0.0.1,
-                                            patientTag: $0.1)
+                    try PatientAlert.Record(patientAlert: $0.0.0.0.1,
+                                            patient: $0.0.0.0.0,
+                                            responder: $0.1,
+                                            gateway: $0.0.0.1,
+                                            premise: $0.0.1,
+                                            //Fix when outer join is possible
+                                            patientTag: nil)
                 }.parse()
             })
     }
