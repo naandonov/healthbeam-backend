@@ -12,6 +12,13 @@ extension Environment {
     static var DATABASE_URL: String? {
         return Environment.get("DATABASE_URL")
     }
+
+    static var ACTIVE_DATABASE_URL: String? {
+        if let activeDatabaseKey = Environment.get("ACTIVE_DATABASE") {
+            return Environment.get(activeDatabaseKey)
+        }
+        return nil
+    }
     
     static var PRODUCTION_DATABASE_URL: String? {
         return Environment.get("HEROKU_POSTGRESQL_MAUVE_URL")
